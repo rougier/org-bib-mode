@@ -109,13 +109,12 @@ By default, all subentries are counted; restrict with LEVEL."
 
 (defun org-bib--get-crossref-info (doi)
   "Retrieve bibtex item using crossref information and DOI."
-  
+
   (let ((url-mime-accept-string "text/bibliography;style=bibtex"))
-    (with-current-buffer 
-        (url-retrieve-synchronously 
+    (with-current-buffer
+      (url-retrieve-synchronously 
          (format "http://dx.doi.org/%s" 
        	         (replace-regexp-in-string "http://dx.doi.org/" "" doi)))
-      (switch-to-buffer (current-buffer))
       (setq bibtex-entry 
      	    (buffer-substring 
           	 (string-match "@" (buffer-string))
@@ -164,12 +163,13 @@ By default, all subentries are counted; restrict with LEVEL."
   "Make a new entry from a PDF"
   (interactive "MPDF: ")
 
-  (let ((command (format "pdftotext -f 1 -l 1 %s - | grep -i doi" pdf)))
-  (with-current-buffer "*Shell Command Output*"
-    (shell-command command))
-    (goto-char (point-min))
-    (search-forward-regexp "\\(10\\.[0-9]\\{4,9\\}/[-+._;()/:A-Z0-9]+\\)")
-    (org-bib-doi (match-string 1))))
+  (shell-command (format "pdftotext -f 1 -l 1 %s - | grep -i doi" pdf))
+  (let ((doi ""))
+    (with-current-buffer "*Shell Command Output*"
+      (goto-char (point-min))
+      (search-forward-regexp "\\(10\\.[0-9]\\{4,9\\}/[-+._;()/:A-Z0-9]+\\)")
+      (setq doi (match-string 1)))
+    (org-bib-doi doi)))
 
 (defun org-bib-doi (doi)
   "Make a new entry from a DOI"
@@ -295,9 +295,11 @@ By default, all subentries are counted; restrict with LEVEL."
   ;; Add a local hook on save in order to update counts
   (add-hook 'before-save-hook #'org-bib--update-count 0 t)
 
-
+  ;; Drag and drop
   (add-to-list 'dnd-protocol-alist
-               '("^file:" . org-bib--file-dnd-protocol)))
+               '("^file:" . org-bib--file-dnd-protocol))
+
+  (load-library "bibtex"))
 
 (provide 'org-bib-mode)
 ;;; org-bib-mode.el ends here
