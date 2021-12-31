@@ -1,0 +1,453 @@
+
+  /----------------------------------------------------------------------------/
+  *Literate & Annotated bibliography* — Nicolas P. Rougier
+  /Last updated on/ [2021-12-30 Thu] /— Insert new entry from/ [PDF] [DOI] 
+  /----------------------------------------------------------------------------/
+  
+* Unsorted /(1)/
+
+** Emergence of abstract rules in the primate brain       [cite:@Mansouri:2020] [[~/Papers/2021 - Emergence of abstract rules in the primate brain.pdf][|PDF|]]
+#+begin_src bibtex
+% Entry added on 2021-12-31
+@article{Mansouri:2020,
+  title =        {Emergence of abstract rules in the primate brain},
+  volume =       21,
+  ISSN =         {1471-0048},
+  url =          {http://dx.doi.org/10.1038/s41583-020-0364-5},
+  DOI =          {10.1038/s41583-020-0364-5},
+  number =       11,
+  journal =      {Nature Reviews Neuroscience},
+  publisher =    {Springer Science and Business Media LLC},
+  author =       {Mansouri, Farshad Alizadeh and Freedman, David
+                  J. and Buckley, Mark J.},
+  year =         2020,
+  month =        {Sep},
+  pages =        {595–610}
+}
+#+end_src
+
+*** Abstract
+
+Various aspects of human cognition are shaped and enriched by abstract rules, which help to describe, link and classify discrete events and experiences into meaningful concepts. However, where and how these entities emerge in the primate brain and the neuronal mechanisms underlying them remain the subject of extensive research and debate. Evidence from imaging studies in humans and single-neuron recordings in monkeys suggests a pivotal role for the prefrontal cortex in the representation of abstract rules; however, behavioural studies in lesioned monkeys and data from neuropsychological examinations of patients with prefrontal damage indicate substantial functional dissociations and task dependency in the contribution of prefrontal cortical regions to rule-guided behaviour. This Review describes our current understanding of the dynamic emergence of abstract rules in primate cognition, and of the distributed neural network that supports abstract rule formation, maintenance, revision and task-dependent implementation.
+
+*** Notes
+
+/To be written/
+
+
+* To Read /(3)/
+
+** Neuroscience needs evolution                              [cite:@Cisek:2021] [[~/Papers/2021 - Neuroscience needs evolution.pdf][|PDF|]]
+#+begin_src bibtex
+@article{Cisek:2021,
+  title =        {Neuroscience needs evolution},
+  volume =       {377},
+  ISSN =         {1471-2970},
+  url =          {http://dx.doi.org/10.1098/rstb.2020.0518},
+  DOI =          {10.1098/rstb.2020.0518},
+  number =       {1844},
+  journal =      {Philosophical Transactions of the Royal Society B:
+                  Biological Sciences},
+  publisher =    {The Royal Society},
+  author =       {Cisek, Paul and Hayden, Benjamin Y.},
+  year =         {2021},
+  month =        {Dec}
+}
+#+end_src
+
+*** Abstract
+The nervous system is a product of evolution. That is, it was constructed through a long series of modifications, within the strong constraints of heredity, and continuously subjected to intense selection pressures. As a result, the organization and functions of the brain are shaped by its history. We believe that this fact, underappreciated in contemporary systems neuroscience, offers an invaluable aid for helping us resolve the brain's mysteries. Indeed, we think that the consideration of evolutionary history ought to take its place alongside other intellectual tools used to understand the brain, such as behavioural experiments, studies of anatomical structure and functional characterization based on recordings of neural activity. In this introduction, we argue for the importance of evolution by highlighting specific examples of ways that evolutionary theory can enhance neuroscience. The rest of the theme issue elaborates this point, emphasizing the conservative nature of neural evolution, the important consequences of specific transitions that occurred in our history, and the ways in which considerations of evolution can shed light on issues ranging from specific mechanisms to fundamental principles of brain organization.
+
+*** Notes
+/To be written/
+
+** Forms of explanation & understanding                   [cite:@Thompson:2021] [[~/Papers/2021 - Forms of explanation and understanding for neuroscience and artificial intelligence.pdf][|PDF|]]
+#+begin_src bibtex
+@article{Thompson:2021,
+  title =        {Forms of explanation and understanding for
+                  neuroscience and artificial intelligence},
+  volume =       {126},
+  ISSN =         {1522-1598},
+  url =          {http://dx.doi.org/10.1152/jn.00195.2021},
+  DOI =          {10.1152/jn.00195.2021},
+  number =       {6},
+  journal =      {Journal of Neurophysiology},
+  publisher =    {American Physiological Society},
+  author =       {Thompson, Jessica A. F.},
+  year =         {2021},
+  month =        {Dec},
+  pages =        {1860–1874}
+}
+#+end_src
+
+*** Abstract
+
+Much of the controversy evoked by the use of deep neural networks as models of biological neural systems amount to debates over what constitutes scientific progress in neuroscience. To discuss what constitutes scientific progress, one must have a goal in mind (progress toward what?). One such long-term goal is to produce scientific explanations of intelligent capacities (e.g., object recognition, relational reasoning). I argue that the most pressing philosophical questions at the intersection of neuro- science and artificial intelligence are ultimately concerned with defining the phenomena to be explained and with what consti- tute valid explanations of such phenomena. I propose that a foundation in the philosophy of scientific explanation and understanding can scaffold future discussions about how an integrated science of intelligence might progress. Toward this vision, I review relevant theories of scientific explanation and discuss strategies for unifying the scientific goals of neuroscience and AI.
+
+*** Notes
+
+/To be written/
+
+** Computational validity                                   [cite:@Redish:2021] [[doi:10.1098/rstb.2020.0525][|DOI|]]
+#+begin_src bibtex
+@article{Redish:2021,
+  title =        {Computational validity: using computation to
+  translate behaviours across species},
+  volume =       {377},
+  ISSN =         {1471-2970},
+  url =          {http://dx.doi.org/10.1098/rstb.2020.0525},
+  DOI =          {10.1098/rstb.2020.0525},
+  number =       {1844},
+  journal =      {Philosophical Transactions of the Royal Society B:
+  Biological Sciences},
+  publisher =    {The Royal Society},
+  author =       {Redish, A. David and Kepecs, Adam and Anderson, Lisa
+  M. and Calvin, Olivia L. and Grissom, Nicola M. and Haynos, Ann
+  F. and Heilbronner, Sarah R. and Herman, Alexander B. and Jacob,
+  Suma and Ma, Sisi and et al.},
+  year =         {2021},
+  month =        {Dec}
+}
+#+end_src
+
+*** Abstract
+
+We propose a new conceptual framework (computational validity) for translation across species and populations based on the computational similarity between the information processing underlying parallel tasks. Translating between species depends not on the superficial similarity of the tasks presented, but rather on the computational similarity of the strategies and mechanisms that underlie those behaviours. Computational validity goes beyond construct validity by directly addressing questions of information processing. Computational validity interacts with circuit validity as computation depends on circuits, but similar computations could be accomplished by different circuits. Because different individuals may use different computations to accomplish a given task, computational validity suggests that behaviour should be understood through the subject's point of view; thus, behaviour should be characterized on an individual level rather than a task level. Tasks can constrain the computational algorithms available to a subject and the observed subtleties of that behaviour can provide information about the computations used by each individual. Computational validity has especially high relevance for the study of psychiatric disorders, given the new views of psychiatry as identifying and mediating information processing dysfunctions that may show high inter-individual variability, as well as for animal models investigating aspects of human psychiatric disorders.
+
+*** Notes
+
+/To be written/
+
+
+* Programming /(3)/
+
+** Did you miss my comments or what?                        [cite:@Miller:2022] [[~/Papers/2021 - Did You Miss my Comment or What.pdf][|PDF|]]
+#+begin_src bibtex
+@inproceedings{Miller:2022,
+  title =        {``Did You Miss My Comment or What?'' Understanding
+                    Toxicity in Open Source Discussions},
+  author =       {Miller, Courtney and Cohen, Sophie and Klug, Daniel
+  and Vasilescu, Bodgan and K{\"a}stner, Christian},
+  booktitle =    {International Conference on Software Engineering,
+  ICSE, ACM (2022)},
+  year =         2022,
+  organization = {IEEE},
+  series =       {ICSE},
+  publisher =    {ACM}
+}
+#+end_src
+
+*** Abstract
+
+Online toxicity is ubiquitous across the internet and its negative impact on the people and online communities it effects has been well documented. However, toxicity manifests differently on various platforms and toxicity in open source communities, while frequently discussed, is not well understood. We take a first stride at understanding the characteristics of open source toxicity to better inform future work designing effective intervention and detection methods. To this end, we curate a sample of 100 toxic GitHub issue discussions combining multiple search and sampling strategies. We then qualitatively analyze the sample to gain an understanding of the characteristics of open-source toxicity. We find that the prevalent forms of toxicity in open source differ from those observed on other platforms like Reddit or Wikipedia. We find some of the most prevalent forms of toxicity in open source are entitled, demanding, and arrogant comments from project users and insults arising from technical disagreements. In addition, not all toxicity was written by people external to the projects, project members were also common authors of toxicity. We also provide in-depth discussions about the implications of our findings including patterns that may be useful for detection work and subsequent questions for future work
+
+*** Notes
+
+/To be written/
+
+** Literate Programming                                      [cite:@Knuth:1984] [[doi:10.1093/comjnl/27.2.97][|DOI|]]
+#+begin_src bibtex
+@article{Knuth:1984,
+  title =        {Literate Programming},
+  volume =       {27},
+  ISSN =         {1460-2067},
+  url =          {http://dx.doi.org/10.1093/comjnl/27.2.97},
+  DOI =          {10.1093/comjnl/27.2.97},
+  number =       {2},
+  journal =      {The Computer Journal},
+  publisher =    {Oxford University Press (OUP)},
+  author =       {Knuth, D. E.},
+  year =         {1984},
+  month =        {Feb},
+  pages =        {97–111},
+}
+#+end_src
+
+*** Abstract
+
+The author and his associates have been experimenting for the past several years with a programming language and documentation system called WEB. This paper presents WEB by example, and discusses why the new system appears to be an improvement over previous ones.
+
+*** Notes
+
+Fundamental article introducing litterate programming.
+
+** Breaking paragraphs into lines                            [cite:@Knuth:1981] [[~/Papers/1984 - Breaking Paragraphs into Lines.pdf][|PDF|]]
+#+begin_src bibtex
+@article{Knuth:1981,
+  title =        {Breaking paragraphs into lines},
+  volume =       11,
+  ISSN =         {1097-024X},
+  url =          {http://dx.doi.org/10.1002/spe.4380111102},
+  DOI =          {10.1002/spe.4380111102},
+  number =       11,
+  journal =      {Software: Practice and Experience},
+  publisher =    {Wiley},
+  author =       {Knuth, Donald E. and Plass, Michael F.},
+  year =         1981,
+  month =        {Nov},
+  pages =        {1119–1184}
+}
+#+end_src
+
+*** Abstract
+
+This paper discusses a new approach to the problem of dividing the text of a paragraph into lines of approximately equal length. Instead of simply making decisions one line at a time, the method considers the paragraph as a whole, so that the final appearance of a given line might be influenced by the text on succeeding lines. A system based on three simple primitive concepts called ‘boxes’, ‘glue’, and ‘penalties’ provides the ability to deal satisfactorily with a wide variety of typesetting problems in a unified framework, using a single algorithm that determines optimum breakpoints. The algorithm avoids backtracking by a judicious use of the techniques of dynamic programming. Extensive computational experience confirms that the approach is both efficient and effective in producing high-quality output. The paper concludes with a brief history of line-breaking methods, and an appendix presents a simplified algorithm that requires comparatively few resources.
+
+*** Notes
+
+/To be written/
+
+
+* Neuroscience & Philosophy /(7)/
+
+** Forms of explanation & understanding for neuroscience  [cite:@Thompson:2021] [[~/Papers/2021 - Forms of explanation and understanding for neuroscience and artificial intelligence.pdf][|PDF|]]
+#+begin_src bibtex
+@article{Thompson:2021,
+  title =        {Forms of explanation and understanding for
+                  neuroscience and artificial intelligence},
+  volume =       {126},
+  ISSN =         {1522-1598},
+  url =          {http://dx.doi.org/10.1152/jn.00195.2021},
+  DOI =          {10.1152/jn.00195.2021},
+  number =       {6},
+  journal =      {Journal of Neurophysiology},
+  publisher =    {American Physiological Society},
+  author =       {Thompson, Jessica A. F.},
+  year =         {2021},
+  month =        {Dec},
+  pages =        {1860–1874}
+}
+#+end_src
+
+*** Abstract
+
+Much of the controversy evoked by the use of deep neural networks as models of biological neural systems amount to debates over what constitutes scientific progress in neuroscience. To discuss what constitutes scientific progress, one must have a goal in mind (progress toward what?). One such long-term goal is to produce scientific explanations of intelligent capacities (e.g., object recognition, relational reasoning). I argue that the most pressing philosophical questions at the intersection of neuro- science and artificial intelligence are ultimately concerned with defining the phenomena to be explained and with what consti- tute valid explanations of such phenomena. I propose that a foundation in the philosophy of scientific explanation and understanding can scaffold future discussions about how an integrated science of intelligence might progress. Toward this vision, I review relevant theories of scientific explanation and discuss strategies for unifying the scientific goals of neuroscience and AI.
+
+*** Notes
+
+/To be written/
+
+** The Brain Doesn’t Think the Way You Think It Does    [cite:@Cepelewicz:2021] [[https://www.quantamagazine.org/mental-phenomena-dont-map-into-the-brain-as-expected-20210824][|WEB|]]
+#+begin_src bibtex
+@Misc {Cepelewicz:2021,
+  title =        {The Brain Doesn’t Think the Way You Think It Does},
+  author =       {Jordana Cepelewicz},
+  year =         {2021},
+  url =          {https://www.quantamagazine.org/mental-phenomena-dont-map-into-the-brain-as-expected-20210824/},
+}
+#+end_src
+
+*** Abstract
+
+Familiar categories of mental functions such as perception, memory and attention reflect our experience of ourselves, but they are misleading about how the brain works. More revealing approaches are emerging.
+
+*** Notes
+
+/To be written/
+
+** On the origin of minds                                     [cite:@Lyon:2021] [[https://aeon.co/essays/the-study-of-the-mind-needs-a-copernican-shift-in-perspective][|WEB|]]
+#+begin_src bibtex
+@Misc {Lyon:2021,
+  title =        {On the origin of minds},
+  author =       {Pamela Lyon},
+  year =         {2021},
+  url =          {https://aeon.co/essays/the-study-of-the-mind-needs-a-copernican-shift-in-perspective},
+}
+#+end_src
+
+*** Abstract
+
+In "On the Origin of Species (1859)", Charles Darwin draws a picture of the long sweep of evolution, from the beginning of life, playing out along two fundamental axes: physical and mental. Body and mind. All living beings, not just some, evolve by natural selection in both ‘corporeal and mental endowments’, he writes. When psychology has accepted this view of nature, Darwin predicts, the science of mind ‘will be based on a new foundation’, the necessarily gradual evolutionary development ‘of each mental power and capacity’.
+
+*** Notes
+
+/To be written/
+
+** The Futility of Decision Making Research                  [cite:@Weiss:2021] [[~/Papers/2021 - The futility of decision making research.pdf][|PDF|]]
+#+begin_src bibtex
+@article{Weiss:2021,
+  title =        {The futility of decision making research},
+  volume =       {90},
+  ISSN =         {0039-3681},
+  url =          {http://dx.doi.org/10.1016/j.shpsa.2021.08.018},
+  DOI =          {10.1016/j.shpsa.2021.08.018},
+  journal =      {Studies in History and Philosophy of Science Part A},
+  publisher =    {Elsevier BV},
+  author =       {Weiss, David J. and Shanteau, James},
+  year =         {2021},
+  month =        {Dec},
+  pages =        {10–14}
+}
+#+end_src
+
+*** Abstract
+
+We have each spent more than 50 years doing research that has had little impact. Even more lamentable is that our field, judgment and decision making (JDM), has on the whole had little impact during that span. We attribute that failure to the use of methodologies that emphasize testing models rather than looking for differences in behavior. The “cognitive revolution” led the field astray, toward the goal of studying model fit rather than comparing observable results. With modeling as the goal, experimentation was stultified. Simple tasks became dominant. Although a poor metaphor for real decision making, the gambling paradigm has lasted forever because the inputs to the decision are known to the researcher and thus easily modeled.
+
+*** Notes
+
+/To be written/
+
+** Refocusing Neuroscience                                  [cite:@Pessoa:2021] [[~/Papers/2021 - Refocusing Neuroscience.pdf][|PDF|]]
+#+begin_src bibtex
+@article{Pessoa:2021,
+  title =        {Refocusing Neuroscience: Moving Away from Mental
+  Categories and Toward Complex Behaviors},
+  url =          {http://dx.doi.org/10.31219/osf.io/8cmhg},
+  DOI =          {10.31219/osf.io/8cmhg},
+  publisher =    {Center for Open Science},
+  author =       {Pessoa, Luiz and Medina, Loreta and Desfilis, Ester},
+  year =         {2021},
+  month =        {May}
+}
+#+end_src
+
+*** Abstract
+
+Mental terms—such as perception, cognition, action, emotion, as well as attention, memory, decision making—are epistemically sterile. We support our thesis based on extensive comparative neuroanatomy knowledge of the organization of the vertebrate brain. Evolutionary pressures have molded the central nervous system to promote survival. Careful characterization of the vertebrate brain shows that its architecture supports an enormous amount of communication and integration of signals, especially in birds and mammals. The general architecture supports a degree of “computational flexibility” that enables animals to cope successfully with complex and ever-changing environments. Here, we suggest that the vertebrate neuroarchitecture does not respect the boundaries of standard mental terms, and propose that neuroscience should aim to unravel the dynamic coupling between large-scale brain circuits and complex, naturalistic behaviors.
+
+*** Notes
+
+/To be written./
+
+** How to Control Behavioral Studies for Rodents            [cite:@Genzel:2021] [[file:~/Papers/2021 - How to Control Behavioral Studies for Rodents.pdf][|PDF|]]
+#+begin_src bibtex
+@article{Genzel:2021,
+  title =        {How to Control Behavioral Studies for Rodents—Don’t
+                  Project Human Thoughts onto Them},
+  volume =       {8},
+  ISSN =         {2373-2822},
+  url =          {http://dx.doi.org/10.1523/ENEURO.0456-20.2021},
+  DOI =          {10.1523/eneuro.0456-20.2021},
+  number =       {1},
+  journal =      {eneuro},
+  publisher =    {Society for Neuroscience},
+  author =       {Genzel, Lisa},
+  year =         {2021},
+  month =        {Jan},
+  pages =        {ENEURO.0456–20.2021}
+}
+#+end_src
+
+*** Abstract
+
+In neuroscience research, we often use behavior as an easy tool and assume a straightforward relationship between memory and behavior. However, many factors are often not accounted for and need to be considered when interpreting a behavioral outcome. This opinion article will discuss factors in rodent studies such as handling and how the animal views the world, that will affect whether memory leads to a certain behavior.
+
+*** Notes
+
+/To be written/
+
+** Living Things Are Not (20th Century) Machines           [cite:@Bongard:2021] [[~/Papers/2021 - Living Things Are Not (20th Century) Machines.pdf][|PDF|]]
+#+begin_src bibtex
+@article{Bongard:2021,
+  title =        {Living Things Are Not (20th Century) Machines:
+  Updating Mechanism Metaphors in Light of the Modern Science of
+  Machine Behavior},
+  volume =       {9},
+  ISSN =         {2296-701X},
+  url =          {http://dx.doi.org/10.3389/fevo.2021.650726},
+  DOI =          {10.3389/fevo.2021.650726},
+  journal =      {Frontiers in Ecology and Evolution},
+  publisher =    {Frontiers Media SA},
+  author =       {Bongard, Joshua and Levin, Michael},
+  year =         {2021},
+  month =        {Mar}
+}
+#+end_src
+
+*** Abstract
+
+One of the most useful metaphors for driving scientific and engineering progress has been that of the “machine.” Much controversy exists about the applicability of this concept in the life sciences. Advances in molecular biology have revealed numerous design principles that can be harnessed to understand cells from an engineering perspective, and build novel devices to rationally exploit the laws of chemistry, physics, and computation. At the same time, organicists point to the many unique features of life, especially at larger scales of organization, which have resisted decomposition analysis and artificial implementation. Here, we argue that much of this debate has focused on inessential aspects of machines – classical properties which have been surpassed by advances in modern Machine Behavior and no longer apply. This emerging multidisciplinary field, at the interface of artificial life, machine learning, and synthetic bioengineering, is highlighting the inadequacy of existing definitions. Key terms such as machine, robot, program, software, evolved, designed, etc., need to be revised in light of technological and theoretical advances that have moved past the dated philosophical conceptions that have limited our understanding of both evolved and designed systems. Moving beyond contingent aspects of historical and current machines will enable conceptual tools that embrace inevitable advances in synthetic and hybrid bioengineering and computer science, toward a framework that identifies essential distinctions between fundamental concepts of devices and living agents. Progress in both theory and practical applications requires the establishment of a novel conception of “machines as they could be,” based on the profound lessons of biology at all scales. We sketch a perspective that acknowledges the remarkable, unique aspects of life to help re-define key terms, and identify deep, essential features of concepts for a future in which sharp boundaries between evolved and designed systems will not exist.
+
+“Can machines think?” This should begin with definitions of the meaning of the terms “machine” and “think.”                       – Alan Turing, 1950
+
+*** Notes
+
+/To be written/
+
+
+* Neuro-anatomy /(1)/
+
+** Homeostatic and regenerative neurogenesis in salamanders  [cite:@Joven:2018] [[~/Papers/2021 - Homeostatic and regenerative neurogenesis in salamanders.pdf][|PDF|]]
+#+begin_src bibtex
+@article{Joven:2018,
+  title =        {Homeostatic and regenerative neurogenesis in
+  salamanders},
+  volume =       {170},
+  ISSN =         {0301-0082},
+  url =          {http://dx.doi.org/10.1016/j.pneurobio.2018.04.006},
+  DOI =          {10.1016/j.pneurobio.2018.04.006},
+  journal =      {Progress in Neurobiology},
+  publisher =    {Elsevier BV},
+  author =       {Joven, Alberto and Simon, András},
+  year =         {2018},
+  month =        {Nov},
+  pages =        {81–98}
+}
+#+end_src
+
+*** Abstract
+
+Large-scale regeneration in the adult central nervous system is a unique capacity of salamanders among tetra- pods. Salamanders can replace neuronal populations, repair damaged nerve !bers and restore tissue architecture in retina, brain and spinal cord, leading to functional recovery. The underlying mechanisms have long been di"cult to study due to the paucity of available genomic tools. Recent technological progress, such as genome sequencing, transgenesis and genome editing provide new momentum for systematic interrogation of re- generative processes in the salamander central nervous system. Understanding central nervous system re- generation also entails designing the appropriate molecular, cellular, and behavioral assays. Here we outline the organization of salamander brain structures. With special focus on ependymoglial cells, we integrate cellular and molecular processes of neurogenesis during developmental and adult homeostasis as well as in various injury models. Wherever possible, we correlate developmental and regenerative neurogenesis to the acquisition and recovery of behaviors. Throughout the review we place the !ndings into an evolutionary context for inter-species comparisons.
+
+*** Notes
+
+Great figure of the salamander circuitry.
+
+
+* Books /(2)/
+
+** Brains Through Time                                   [cite:@Striedter:2019] [[~/Papers/2019 - Brains through time.pdf][|PDF|]]
+#+begin_src bibtex
+@book{Striedter:2019,
+  doi = {10.1093/oso/9780195125689.001.0001},
+  url = {https://doi.org/10.1093/oso/9780195125689.001.0001},
+  year = {2019},
+  month = dec,
+  publisher = {Oxford University Press},
+  author = {Georg F. Striedter and R. Glenn Northcutt},
+  title = {Brains Through Time}
+}
+#+end_src
+
+*** Abstract
+
+Much is conserved in vertebrate evolution, but significant changes in the nervous system occurred at the origin of vertebrates and in most of the major vertebrate lineages. This book examines these innovations and relates them to evolutionary changes in other organ systems, animal behavior, and ecological conditions at the time. The resulting perspective clarifies what makes the major vertebrate lineages unique and helps explain their varying degrees of ecological success. One of the book’s major conclusions is that vertebrate nervous systems are more diverse than commonly assumed, at least among neurobiologists. Examples of important innovations include not only the emergence of novel brain regions, such as the cerebellum and neocortex, but also major changes in neuronal circuitry and functional organization. A second major conclusion is that many of the apparent similarities in vertebrate nervous systems resulted from convergent evolution, rather than inheritance from a common ancestor. For example, brain size and complexity increased numerous times, in many vertebrate lineages. In conjunction with these changes, olfactory inputs to the telencephalic pallium were reduced in several different lineages, and this reduction was associated with the emergence of pallial regions that process non-olfactory sensory inputs. These conclusions cast doubt on the widely held assumption that all vertebrate nervous systems are built according to a single, common plan. Instead, the book encourages readers to view both species similarities and differences as fundamental to a comprehensive understanding of nervous systems.
+
+*** Notes
+
+/To be written/
+
+** Neuroscience of Rule-Guided Behavior                      [cite:@Bunge:2007] [[~/Papers/2007 - Neuroscience of rule-guided behavior.pdf][|PDF|]]
+#+begin_src bibtex
+@book{Bunge:2007,
+  doi = {10.1093/acprof:oso/9780195314274.001.0001},
+  url = {https://doi.org/10.1093/acprof:oso/9780195314274.001.0001},
+  year = {2007},
+  month = nov,
+  publisher = {Oxford University Press},
+  editor = {Silvia A. Bunge and Jonathan D. Wallis},
+  title = {Neuroscience of Rule-Guided Behavior}
+}
+#+end_src
+
+*** Abstract
+
+A fundamental question facing neuroscience is how complex behavior is controlled. This book brings together a number of leading cognitive and systems neuroscientists focusing on this question. Presenting a wide range of methods and approaches, these researchers provide novel insights into the neuronal mechanisms that support rule-guided behavior.
+
+*** Notes
+
+/To be written/
+
+
+* Configuration :noexport:
+#+STARTUP: show2levels
+
+*NOTE* This literate and annotated bibliography is an adaptation of the idea 
+[[http://cachestocaches.com/2020/3/org-mode-annotated-bibliography/][Managing my Annotated Bibliography with Emacs' Org Mode]] by [[http://gjstein.com/][Gregory J Stein]].
+
+
+
+
+
+
