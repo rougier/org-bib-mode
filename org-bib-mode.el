@@ -179,7 +179,7 @@ By default, all subentries are counted; restrict with LEVEL."
     (with-temp-buffer
       (insert bibitem)
       (let* ((bibkey (org-bib--parse-bibtex-key))
-             (title (org-bib--string-fit (org-bib--parse-bibtex-title) 54))
+             (title (org-bib--string-fit (org-bib--parse-bibtex-title) (- 67 (length bibkey))))
              (date (format-time-string "%% Entry added on %Y-%m-%d at %H:%M\n"))
              (cite (format "[cite:@%s]" bibkey))
              (doi (format "[[doi:%s][|DOI|]]" (org-bib--parse-bibtex-doi))))
