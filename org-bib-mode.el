@@ -88,27 +88,6 @@ By default, all subentries are counted; restrict with LEVEL."
         (goto-char beg)
         (insert (format "(%d)" count))))))
 
-(defun org-bib--parse-bibtex-key ()
-  "Get KEY of current BibTeX entry."
-  (save-excursion
-    (goto-char (point-min))
-    (search-forward-regexp "@.+{\\(.+\\),")
-    (string-trim
-     (substring-no-properties (match-string 1)))))
-
-(defun org-bib--parse-bibtex-title ()
-  "Get content of field TITLE of current BibTeX entry."
-  (string-trim (replace-regexp-in-string
-                "[ \n]+" " " (bibtex-text-in-field "title"))))
-
-(defun org-bib--parse-bibtex-year ()
-  "Get content of field YEAR of current BibTeX entry."
-  (string-trim (replace-regexp-in-string
-               "[ \n]+" " " (bibtex-text-in-field "year"))))
-
-(defun org-bib--parse-bibtex-doi ()
-  "Get content of field DOI of current BibTeX entry."
-  (string-trim (bibtex-text-in-field "doi")))
 
 (defun org-bib--get-crossref-info (doi)
   "Retrieve bibtex item using crossref information and DOI."
@@ -180,17 +159,54 @@ By default, all subentries are counted; restrict with LEVEL."
           (setq doi (substring doi 0 -1))))
     (org-bib-doi doi pdf)))
 
+
+
+(defun org-bib--bibtex-get (field)
+  (cond ((string= field "type")
+         (progn (goto-char (point-min))
+                (search-forward-regexp "@\\(.+\\){")
+                (string-trim (replace-regexp-in-string
+                              "[ \n]+" " " (match-string 1)))))
+        ((string= field "key")
+         (progn (goto-char (point-min))
+                (search-forward-regexp "@.+{\\(.+\\),")
+                (string-trim (replace-regexp-in-string
+                              "[ \n]+" " " (match-string 1)))))
+        (t (let ((field (bibtex-text-in-field field)))
+             (if field 
+               (string-trim (replace-regexp-in-string "[ \n]+" " " field)))))))
+
 (defun org-bib-doi (doi &optional pdf)
   "Make a new entry from a DOI"
   (interactive "MDOI: ")
 
   (let ((bibitem (org-bib--get-crossref-info doi)))
-    ;; (message "org-bib-doi/ bibitem: %s" bibitem)
     (with-temp-buffer
       (insert bibitem)
-      (let* ((bibkey (org-bib--parse-bibtex-key))
-             (year (org-bib--parse-bibtex-year))
-             (title (org-bib--parse-bibtex-title))
+      (let* ((author (org-bib--bibtex-get "author"))
+             (editor (org-bib--bibtex-get "editor"))
+             (title (org-bib--bibtex-get "title"))
+             (journal (org-bib--bibtex-get "journal"))
+             (doi (org-bib--bibtex-get "doi"))
+             (url (org-bib--bibtex-get "url"))
+             (volume (org-bib--bibtex-get "volume"))
+             (number (org-bib--bibtex-get "number"))
+             (year (org-bib--bibtex-get "year"))
+             (month (org-bib--bibtex-get "month"))
+             (publisher (org-bib--bibtex-get "publisher"))
+             (bibkey (org-bib--bibtex-get "key"))
+             (type (org-bib--bibtex-get "type"))
+             (properties
+              (concat ":PROPERTIES:\n"
+                      (if key (format ":CUSTOM_ID: %s\n" key))
+                      (if type (format ":BTYPE: %s\n" type))
+                      (if author (format ":AUTHOR: %s\n" author))
+                      (if title (format ":TITLE: %s\n" title))
+                      (if year (format ":YEAR: %s\n" year))
+                      (if journal (format ":JOURNAL: %s\n" journal))
+                      (if volume (format ":VOLUME: %s\n" volume))
+                      (if number (format ":NUMBER: %s\n" number))
+                      ":END:"))
              (filename (concat (file-name-as-directory org-bib-pdf-directory)
                                (format "%s - %s.pdf" year title)))
              (filename (replace-regexp-in-string "?" "" filename))
@@ -206,6 +222,7 @@ By default, all subentries are counted; restrict with LEVEL."
         (setq bibtex-entry
               (concat
                (format "** %s %s %s\n" title cite doi)
+               (format "%s\n" properties)
                (format "#+begin_src bibtex\n%s%s#+end_src\n\n" date bibitem)
                (format "*** Abstract \n\n")
                (format "*** Notes\n\n/To be written/\n\n"))))))
