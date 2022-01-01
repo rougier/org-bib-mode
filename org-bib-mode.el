@@ -41,6 +41,9 @@
 (defcustom org-bib-pdf-directory "~/Papers"
   "Directory where to store pdfs")
 
+(defcustom org-bib-copy-pdf t
+  "Whether to copy PDF in org-bib-pdf-directory")
+
 (define-minor-mode org-bib-mode
   "Minor mode for litetate & annotated bibliography."
   :group 'org-bib
@@ -109,17 +112,17 @@ By default, all subentries are counted; restrict with LEVEL."
 
 (defun org-bib--get-crossref-info (doi)
   "Retrieve bibtex item using crossref information and DOI."
-
+  
   (let ((url-mime-accept-string "text/bibliography;style=bibtex"))
     (with-current-buffer
       (url-retrieve-synchronously 
          (format "http://dx.doi.org/%s" 
        	         (replace-regexp-in-string "http://dx.doi.org/" "" doi)))
-      (setq bibtex-entry 
+            (setq bibtex-entry 
      	    (buffer-substring 
           	 (string-match "@" (buffer-string))
              (point)))
-      (kill-buffer (current-buffer))))
+            (kill-buffer (current-buffer))))
   (with-temp-buffer
     (insert (decode-coding-string bibtex-entry 'utf-8))
     (goto-char (point-min))
@@ -131,7 +134,7 @@ By default, all subentries are counted; restrict with LEVEL."
 ;; https://ivanaf.com/emacs_drag-drop_pdfs_paste_html_custom_templates.html
 (defun org-bib--file-insert (uri)
   (if (string= (substring uri 0 7) "file://")
-      (org-bib-pdf (substring uri 7))))
+      (org-bib-pdf (dnd-unescape-uri (substring uri 7)))))
 
 (defun org-bib--file-dnd-fallback (uri action)
   (let ((dnd-protocol-alist
@@ -163,26 +166,42 @@ By default, all subentries are counted; restrict with LEVEL."
   "Make a new entry from a PDF"
   (interactive "MPDF: ")
 
-  (shell-command (format "pdftotext -f 1 -l 1 %s - | grep -i doi" pdf))
+  ;; Trying to get a DOI from the PDF converted to text (first page only)
+  (shell-command (format "pdftotext -f 1 -l 1 %s - | grep -i doi"
+                         (shell-quote-argument pdf)))
   (let ((doi ""))
     (with-current-buffer "*Shell Command Output*"
       (goto-char (point-min))
       (search-forward-regexp "\\(10\\.[0-9]\\{4,9\\}/[-+._;()/:A-Z0-9]+\\)")
-      (setq doi (match-string 1)))
-    (org-bib-doi doi)))
+      (setq doi (match-string 1))
+      ;; Some editors add a textual dot at the end of the DOI.
+      ;; This confuses the regular expression match and we fix it here.
+      (if (string= (substring doi -1) ".")
+          (setq doi (substring doi 0 -1))))
+    (org-bib-doi doi pdf)))
 
-(defun org-bib-doi (doi)
+(defun org-bib-doi (doi &optional pdf)
   "Make a new entry from a DOI"
   (interactive "MDOI: ")
 
   (let ((bibitem (org-bib--get-crossref-info doi)))
+    ;; (message "org-bib-doi/ bibitem: %s" bibitem)
     (with-temp-buffer
       (insert bibitem)
       (let* ((bibkey (org-bib--parse-bibtex-key))
-             (title (org-bib--string-fit (org-bib--parse-bibtex-title) (- 67 (length bibkey))))
+             (year (org-bib--parse-bibtex-year))
+             (title (org-bib--parse-bibtex-title))
+             (filename (concat (file-name-as-directory org-bib-pdf-directory)
+                               (format "%s - %s.pdf" year title)))
+             (title (org-bib--string-fit title (- 67 (length bibkey))))
              (date (format-time-string "%% Entry added on %Y-%m-%d at %H:%M\n"))
              (cite (format "[cite:@%s]" bibkey))
-             (doi (format "[[doi:%s][|DOI|]]" (org-bib--parse-bibtex-doi))))
+             (doi  (if pdf
+                       (format "[[%s][|PDF|]]" filename)
+                     (format "[[doi:%s][|DOI|]]" (org-bib--parse-bibtex-doi)))))
+        (if (and pdf org-bib-copy-pdf)
+            (copy-file pdf filename t t)
+            (message "Copying %s to %s" pdf filename))
         (setq bibtex-entry
               (concat
                (format "** %s %s %s\n" title cite doi)
