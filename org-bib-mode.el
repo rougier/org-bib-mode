@@ -193,6 +193,7 @@ By default, all subentries are counted; restrict with LEVEL."
              (title (org-bib--parse-bibtex-title))
              (filename (concat (file-name-as-directory org-bib-pdf-directory)
                                (format "%s - %s.pdf" year title)))
+             (filename (replace-regexp-in-string "?" "" filename))
              (title (org-bib--string-fit title (- 67 (length bibkey))))
              (date (format-time-string "%% Entry added on %Y-%m-%d at %H:%M\n"))
              (cite (format "[cite:@%s]" bibkey))
