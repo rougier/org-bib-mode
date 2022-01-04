@@ -44,6 +44,9 @@
 (defcustom org-bib-copy-pdf t
   "Whether to copy PDF in org-bib-pdf-directory")
 
+(defcustom org-bib--fold-state t
+  "Fold state of the buffer")
+
 (define-minor-mode org-bib-mode
   "Minor mode for litetate & annotated bibliography."
   :group 'org-bib
@@ -266,6 +269,18 @@ By default, all subentries are counted; restrict with LEVEL."
   (org-cycle)
   (forward-char 1))
 
+(defun org-bib-shifttab ()
+  (interactive)
+
+  (if org-bib--fold-state
+      (progn (setq org-cycle-separator-lines 0)
+             (setq org-bib--fold-state nil)
+             (org-shifttab 1))
+    (progn (setq org-cycle-separator-lines 2)
+           (setq org-bib--fold-state t)
+           (org-shifttab 2))))
+
+      
 (defun org-bib-export ()
   "Export bibliography to the associated bib file."
   (interactive)
@@ -367,6 +382,10 @@ By default, all subentries are counted; restrict with LEVEL."
   (org-indent-mode)
   (org-hide-block-all)
   (svg-tag-mode t)
+
+  (define-key (current-global-map)
+    [remap org-shifttab] #'org-bib-shifttab)
+  
   (setq-local org-refile-targets `( (,(buffer-name) :maxlevel . 1)))
   (setq-local org-cycle-separator-lines 2)
   (hl-line-mode)
