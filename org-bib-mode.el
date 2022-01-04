@@ -54,6 +54,25 @@
 (define-globalized-minor-mode
    global-org-bib-mode org-bib-mode org-bib-mode-on)
 
+(define-fringe-bitmap 'chevron-right
+  [#b11000
+   #b01100
+   #b00110
+   #b00011
+   #b00110
+   #b01100
+   #b11000] 7 5 '(center nil))
+
+(define-fringe-bitmap 'chevron-left
+  [#b00011
+   #b00110
+   #b01100
+   #b11000
+   #b01100
+   #b00110
+   #b00011] 7 5 '(center nil))
+
+
 ;; Code from https://emacs.stackexchange.com/questions/10245
 ;; by https://emacs.stackexchange.com/users/2241/olaf-b
 (defun org-bib--count-children (&optional level pos match scope)
@@ -235,7 +254,6 @@ By default, all subentries are counted; restrict with LEVEL."
               (concat
                (format "** %s %s %s\n" title cite doi)
                (format "%s\n" properties)
-               (format "#+begin_src bibtex\n%s%s#+end_src\n\n" date bibitem)
                (format "#+begin_src bibtex\n%s%s#+end_src\n" date bibitem)
                (format "*** Abstract \n\n")
                (format "*** Notes\n\n/To be written/\n"))))))
@@ -256,6 +274,36 @@ By default, all subentries are counted; restrict with LEVEL."
                  ".bib")))
     (org-babel-tangle nil bibfile "bibtex")
     (message "Bibliography exported to %s" bibfile)))
+
+(defun org-bib-search (match)
+  (interactive "MSearch: ")
+
+  (remove-overlays nil nil 'org-bib-mark t)
+  (unless (string= match "")
+    (let ((matcher (cdr (org-make-tags-matcher match t))))
+      (save-excursion
+        (goto-char (point-min))
+        (let ((count 0))
+          (while (search-forward-regexp "^\\*\\* .+$" nil t)
+            (save-excursion
+              (goto-char (match-beginning 0))
+              (let ((overlay (make-overlay (+ (point) 1) (line-end-position))))
+                (overlay-put overlay 'org-bib-mark t)
+                (if (apply matcher '(nil nil 2))
+                    (progn
+                      (setq count (+ count 1))
+                      (overlay-put overlay 'face 'nano-subtle)
+                      (overlay-put overlay 'face '(:foreground "black"
+                                                               :inherit 'nano-subtle))
+                      (overlay-put overlay 'before-string
+                                   (propertize ">" 'display 
+                                               (list 'left-fringe
+                                                     'chevron-right
+                                                     'default))))
+                  (overlay-put overlay 'face 'nano-faded)))))
+          (if (> count 0)
+              (message (format "%d match(es)" count))
+            (message "No match")))))))
 
 (defun org-bib-mode-off ()
   "Uninstall org bib mode"
