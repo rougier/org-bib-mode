@@ -409,6 +409,11 @@ By default, all subentries are counted; restrict with LEVEL."
         bibtex-autokey-year-title-separator ""
         bibtex-autokey-edit-before-use nil)
 
+  ;; We removed the required-fields to avoir error when retrieving an
+  ;; entry from biorxiv
+  (setq bibtex-entry-format '(opts-or-alts
+                              numerical-fields))
+  
   ;; Set a global bibfile base on current buffer
   (let ((bibfile
          (concat (file-name-sans-extension (expand-file-name (buffer-name)))
@@ -418,7 +423,7 @@ By default, all subentries are counted; restrict with LEVEL."
   ;; Add a local hook on save in order to update counts
   (add-hook 'before-save-hook #'org-bib--update-count 0 t)
 
-  ;; Drag and drop
+  ;; Drag and drop installation
   (add-to-list 'dnd-protocol-alist
                '("^file:" . org-bib--file-dnd-protocol))
 
