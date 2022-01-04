@@ -355,7 +355,7 @@ By default, all subentries are counted; restrict with LEVEL."
         ("\\(|PDF|\\)" .
          ((lambda (tag) (svg-tag-make tag
                                       :beg 1 :end -1
-                                      :face 'nano-salient))))
+                                      :face 'nano-faded))))
         ("\\(|DOI|\\)" .
          ((lambda (tag) (svg-tag-make tag
                                       :beg 1 :end -1
@@ -367,13 +367,13 @@ By default, all subentries are counted; restrict with LEVEL."
 
         ("\\(\\[cite:@[A-Za-z]+:\\)" .
          ((lambda (tag) (svg-tag-make tag
-                                      :face 'nano-salient
+                                      :face 'nano-faded
                                       :inverse t
                                       :beg 7 :end -1
                                       :crop-right t))))
         ("\\[cite:@[A-Za-z]+:\\([0-9]+\\]\\)" .
          ((lambda (tag) (svg-tag-make tag
-                                      :face 'nano-salient
+                                      :face 'nano-faded
                                       :end -1
                                       :crop-left t))))))
 
@@ -388,11 +388,17 @@ By default, all subentries are counted; restrict with LEVEL."
   
   (setq-local org-refile-targets `( (,(buffer-name) :maxlevel . 1)))
   (setq-local org-cycle-separator-lines 2)
+  (setq-local org-agenda-files (list (buffer-name)))
   (hl-line-mode)
-  
+
+  (setq org-image-actual-width `( ,(truncate (* (frame-pixel-width) 0.85))))
+  (setq org-startup-with-inline-images t)
+
+  ;; (face-remap-add-relative 'org-level-1 :foreground "black")
   (face-remap-set-base 'org-level-2 :inherit 'default)
   (setq-local org-tags-column 1)
-
+  (fringe-mode '(5 . 0))
+  
   ;; Set bibtex key format
   (setq bibtex-autokey-titleword-length 0
         bibtex-autokey-name-year-separator ":"
