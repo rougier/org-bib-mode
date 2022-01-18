@@ -368,13 +368,13 @@ By default, all subentries are counted; restrict with LEVEL."
                                       :beg 1 :end -1
                                       :face 'nano-popout))))
 
-        ("\\(\\[cite:@[A-Za-z]+:\\)" .
+        ("\\(\\[cite:@[A-Za-z-]+:\\)" .
          ((lambda (tag) (svg-tag-make tag
                                       :face 'nano-faded
                                       :inverse t
                                       :beg 7 :end -1
                                       :crop-right t))))
-        ("\\[cite:@[A-Za-z]+:\\([0-9]+\\]\\)" .
+        ("\\[cite:@[A-Za-z-]+:\\([0-9]+\\]\\)" .
          ((lambda (tag) (svg-tag-make tag
                                       :face 'nano-faded
                                       :end -1
