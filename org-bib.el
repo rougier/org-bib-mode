@@ -1,4 +1,4 @@
-;;; org-bib-mode.el --- Literate bibliography -*- lexical-binding: t -*-
+;;; org-bib.el --- Literate bibliography -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2021,2022 Nicolas P. Rougier
 
@@ -36,6 +36,8 @@
 
 ;;; Code:
 (require 'org)
+(require 'org-indent)
+(require 'org-element)
 (require 'bibtex)
 
 
@@ -51,14 +53,15 @@
   :type '(list directory))
 
 (defcustom org-bib-default-library "~/Documents/Papers/papers.org"
-  "Default org library file."
+  "Default org library file (the one that will be open with the
+'org-bib command."
   :type 'file)
 
-(defcustom org-bib-pdftotext "pdftotext"
+(defcustom org-bib-pdftotext-path "pdftotext"
   "Path to pdftotext executable."
   :type 'file)
 
-(defcustom org-bib-exiftool "exiftool"
+(defcustom org-bib-exiftool-path "exiftool"
   "Path to exiftool executable."
   :type 'file)
 
@@ -66,27 +69,18 @@
   "Header where to add new entry."
   :type 'string)
 
-(defcustom org-bib-note-minimum-size 10
-  "Minimal note length to be considered not empty" )
-
-(defcustom org-bib-abstract-minimum-size 10
-  "Minimal abstract length to be considered not empty" )
-
 (defcustom org-bib--fold-state t
   "Fold state of the buffer"
   :group nil)
 
 
-;; Private API
-
-
-;; This function is critical since most operations require to first
-;; identify the key at point. It works by first inspecting the org
-;; properties :KEY: and, if absent, by looking for the next bib entry
-;; and parse the associated key.
 (defun org-bib--key-at-point ()
   "Get entry KEY at point."
 
+  ;; This function is critical since most operations require to first
+  ;; identify the key at point. It works by first inspecting the org
+  ;; properties :KEY: and, if absent, by looking for the next bib entry
+  ;; and parse the associated key.
   (let ((key (org-entry-get (point) "KEY" t)))
     (when (not key)
       (save-excursion
@@ -97,15 +91,6 @@
       (throw 'key-not-found "No key were found on this entry"))))
 
 
-;; This is used for offering completion when editing an entry
-(defun org-bib--collect-keys ()
-  "Collect all keys (from org KEY properties)."
-
-  (org-map-entries
-   (lambda () (org-element-property :KEY (org-element-at-point)))
-   "LEVEL=2"))
-
-;; This is used for offering completion when modifying keywords
 (defun org-bib--collect-keywords ()
   "Collect all keywords (from org KEYWORDS properties)."
 
@@ -113,10 +98,8 @@
    (lambda () (org-element-property :KEYWORDS (org-element-at-point)))
    "LEVEL=2"))
 
-;; This is the different file candidates org-bib will search. If you
-;; have a specific naming scheme for your PDF, this is the place to
-;; add it.
-(defun org-bib--file-candidates (&optional key)
+
+(defun org-bib--file-candidates (key)
   "Return relative filename candidates for entry KEY."
 
   (let* ((bibitem (org-bib--bibitem key))
@@ -130,12 +113,10 @@
      (when key              (format "%s.pdf" key)))))
 
 
-;; Move to the start of an entry (without modifying visibility)
-(defun org-bib--goto (&optional key)
+(defun org-bib--goto (key)
   "Move point to entry KEY, at header start."
 
-  (let ((key (or key (org-bib--key-at-point)))
-        (found))
+  (let ((found))
     (save-excursion
       (goto-char (point-min))
       (setq found (search-forward-regexp key)))
@@ -145,15 +126,15 @@
       (while (> (org-element-property :level (org-element-at-point)) 2)
         (org-up-element)))))
 
-;; Move to the bibtex block of an entry (without modifying visibility)
-(defun org-bib--goto-bibtex (&optional key)
+
+(defun org-bib--goto-bibitem (key)
   "Move point to entry KEY at bibtex block start."
   
   (let ((key (or key (org-bib--key-at-point))))
     (org-bib--goto key)
     (org-next-block 1)))
 
-;; Move to the abstract section of an entry (without modifying visibility)
+
 (defun org-bib--goto-abstract (&optional key)
   "Move point to entry KEY, at abstract header start."
 
@@ -162,7 +143,7 @@
     (org-goto-first-child)))
 
 ;; Move to the note section of an entry without modifying visibility
-(defun org-bib--goto-note (&optional key)
+(defun org-bib--goto-note (key)
   "Move point to entry KEY, at note header start."
 
   (let ((key (or key (org-bib--key-at-point))))
@@ -170,46 +151,64 @@
     (org-goto-first-child)
     (org-goto-sibling)))
 
+;; (defun org-bib-get-value (field item)
+;;   "Return the FIELD value for ITEM. ITEM can be a key (string), a
+;; bibitem (string) or an entry (alist)."
 
+;;   (cond ((and (stringp item) (string-match "{" item))
+;;          (org-bib--get-value-from-bibitem field item))
+;;         ((stringp item)
+;;          (org-bib--get-value-from-key field item))
+;;         ((listp item)
+;;          (org-bib--get-value-from-entry field item))
+;;         (t (throw "Cannot interpret item (%s)" item))))
+;; (defun org-bib-get-value (field key))
+;; (defun org-bib-get-notes (key))
+;; (defun org-bib-get-bibitem (key))
+;; (defun org-bib-get-file (key))
+;; (defun org-bib-get-url (key))
+;; (defun org-bib-get-doi (key))
+
+;; (defun org-bib--get-value-from-key (field key)
+;;   "Return the FIELD value for KEY entry.")
+
+;; (defun org-bib--get-value-from-bibitem (field item)
+;;   "Return the FIELD value for ITEM.")
+
+;; (defun org-bib--get-value-from-entry (field entry)
+;;   "Return the FIELD value for ENTRY.")
+
+;; (defun org-bib-has-value (field item)
+;;   "Return whether ITEM has a FIELD value. ITEM can be a
+;; key (string), a bibitem (string) or an entry (alist)."
+
+;;   (cond ((and (stringp item) (string-match "{" item))
+;;          (org-bib--has-value-from-bibitem field item))
+;;         ((stringp item)
+;;          (org-bib--has-value-from-key field item))
+;;         ((listp item)
+;;          (org-bib--has-value-from-entry field item))
+;;         (t (throw "Cannot interpret item (%s)" item))))
+
+;; (defun org-bib--has-value-from-key (field key)
+;;   "Return the FIELD value for KEY entry.")
+
+;; (defun org-bib--has-value-from-bibitem (field item)
+;;   "Return the FIELD value for ITEM.")
+
+;; (defun org-bib--has-value-from-entry (field entry)
+;;   "Return the FIELD value for ENTRY.")
+          
 ;; Get bibtex block from entry
-(defun org-bib--get-bibtex (&optional key)
+(defun org-bib--get-bibitem (&optional key)
   "Get bibtex block from entry KEY."
   
   (save-excursion
-    (org-bib--goto-bibtex key)
+    (org-bib--goto-bibitem key)
     (save-restriction
       (widen)
       (org-element-property :value (org-element-at-point)))))
 
-;; Get bibtex abstract from entry
-(defun org-bib--get-abstract (&optional key)
-  "Get abstract from entry KEY."
-  
-  (save-excursion  
-    (org-bib--goto-abstract key)
-    (let* ((element (org-element-at-point))
-           (beg (org-element-property :contents-begin element))
-           (end (org-element-property :contents-end element)))
-      (if (and beg end)
-          (save-restriction
-            (widen)
-            (buffer-substring-no-properties beg end))
-        ""))))
-
-;; Get bibtex notes from entry
-(defun org-bib--get-note (&optional key)
-  "Get notes from entry KEY."
-
-  (save-excursion  
-    (org-bib--goto-note key)
-    (let* ((element (org-element-at-point))
-           (beg (org-element-property :contents-begin element))
-           (end (org-element-property :contents-end element)))
-      (if (and beg end)
-          (save-restriction
-            (widen)
-            (buffer-substring-no-properties beg end))
-        ""))))
 
 (defun org-bib--get-file (&optional key)
   "Return filename associated with entry KEY."
@@ -226,31 +225,55 @@
   
   (org-bib--has-doi key))
 
-(defun org-bib--has-abstract (&optional key)
-  "Return whether entry KEY has an abstract whose length is
-greater than 'org-bib-abstract-minimum-size characters."
 
-  (save-excursion 
-    (org-bib--goto-abstract key)
-    (let* ((element (org-element-at-point))
-           (limit org-bib-abstract-minimum-size)
-           (beg (org-element-property :contents-begin element))
-           (end (org-element-property :contents-end element)))
-      (and beg end (> (- end beg) limit)))))
-
-(defun org-bib--has-note (&optional key)
-  "Return whether entry KEY has an abstract whose length is
-greater than 'org-bib-note-minimum-size characters."
-
+(defun org-bib--set-bibitem-field (key field value)
+  "Set a FIELD to VALUE in the KEY bibitem block."
+  
   (save-excursion
-    (org-bib--goto-note key)
-    (let* ((element (org-element-at-point))
-           (limit org-bib-note-minimum-size)
-           (beg (org-element-property :contents-begin element))
-           (end (org-element-property :contents-end element)))
-      (and beg end (> (- end beg) limit)))))
+    (org-bib--goto-bibitem key)
+    (bibtex-search-entry key)
+    (let ((found (bibtex-search-forward-field field t)))
+      (when found
+        (goto-char (car (cdr found)))
+        (bibtex-kill-field)))
+    (bibtex-make-field
+     (list field nil value) t)))
 
-(defun org-bib--has-file (&optional key)
+(defun org-bib--del-bibitem-field (key field)
+  "Remove a FIELD from the KEY bibitem block."
+  
+  (save-excursion
+    (org-bib--goto-bibitem key)
+    (bibtex-search-entry key)
+    (let ((found (bibtex-search-forward-field field t)))
+      (when found
+        (goto-char (car (cdr found)))
+        (bibtex-kill-field)))))
+
+(defun org-bib--has-note (key)
+  "Return whether entry KEY has an associated note."
+  (save-excursion
+    (goto-char (point-min))
+    (search-forward-regexp (format ":CUSTOM_ID:.*%s:note" key) nil t)))
+
+(defun org-bib--new-note (key)
+  "Create a note section for entry KEY."
+
+  (org-bib--goto key)
+  (if (search-forward-regexp (format ":CUSTOM_ID:.*%s:note" key) nil t)
+      (forward-line 2)
+    (progn
+      (org-goto-first-child)
+      (org-forward-heading-same-level 1 t)
+      (org-insert-heading-respect-content)
+      (insert (concat "Note\n"
+                      ":PROPERTIES:\n"
+                      (format ":CUSTOM_ID: %s:note\n" key)
+                      ":END:\n"))
+      (org-bib--set-bibitem-field key "note"
+                (format "%s::#%s:note" (buffer-file-name) key)))))
+
+(defun org-bib--has-file (key)
   "Return whether entry KEY has an associated file."
 
   (save-excursion
@@ -306,7 +329,7 @@ greater than 'org-bib-note-minimum-size characters."
   "Get entry KEY as an association list. Fields are those of the
 bibitem and there are also a :key and :type fields."
   
-  (let ((bibitem (org-bib--get-bibtex key)))
+  (let ((bibitem (org-bib--get-bibitem key)))
     (with-temp-buffer
       (insert bibitem)
       `((:type .         ,(org-bib--bibitem-get "type"))
@@ -320,6 +343,7 @@ bibitem and there are also a :key and :type fields."
         (:series .       ,(org-bib--bibitem-get "series"))
         (:doi .          ,(org-bib--bibitem-get "doi"))
         (:file .         ,(org-bib--bibitem-get "file"))
+        (:note .         ,(org-bib--bibitem-get "note"))
         (:url .          ,(org-bib--bibitem-get "url"))
         (:tags .         ,(org-bib--bibitem-get "tags"))
         (:keywords .     ,(org-bib--bibitem-get "keywords"))
@@ -329,7 +353,7 @@ bibitem and there are also a :key and :type fields."
         (:month .        ,(org-bib--bibitem-get "month"))
         (:publisher .    ,(org-bib--bibitem-get "publisher"))))))
 
-(defun org-bib--format-header (&optional key)
+(defun org-bib--format-header (key)
   "Formatted org Header org for entry KEY. This should be configurable."
   
   (let* ((bibitem (org-bib--bibitem key))
@@ -344,7 +368,7 @@ bibitem and there are also a :key and :type fields."
                          (t        " "))))
     (format "** %s %s (%s)" prefix title year)))
 
-(defun org-bib--update-header (&optional key)
+(defun org-bib--update-headerline (key)
   "Update org header for entry KEY."
   
   (save-excursion
@@ -353,43 +377,53 @@ bibitem and there are also a :key and :type fields."
       (delete-region (line-beginning-position) (line-end-position))
       (insert header))))
 
-(defun org-bib--update-properties (&optional key)
+(defun org-bib--update-properties (key)
   "Update org properties for entry KEY."
   
   (save-excursion
-    (org-bib--goto key)
-    (let ((bibitem (org-bib--bibitem key)))
+    (let* ((bibitem (org-bib--bibitem key)))
+      (org-bib--goto key)
       (dolist (key (mapcar 'car bibitem))
         (let ((property (upcase (substring (format "%s" key) 1)))
               (value (cdr (assoc key bibitem))))
           (when (and value (not (string= property "TAGS"))
                            (not (string= property "FILE")))
-            (org-set-property property value)))))))
+            (org-set-property property value))))
+      
+      (org-bib--goto key)
+      (org-set-property "CUSTOM_ID" (format "%s" key)))))
+      ;;(org-goto-first-child)
+      ;;(org-set-property "CUSTOM_ID" (format "%s:abstract" key))
+      ;;(org-forward-heading-same-level 1 t)
+      ;;(org-set-property "CUSTOM_ID" (format "%s:notes" key)))))
 
-(defun org-bib--update-tags (&optional key)
+(defun org-bib--update-bibitem (key)
   "Update bibtex tags for entry KEY."
 
   (save-excursion
     (org-bib--goto key)
-    (let ((key (or key (org-bib--key-at-point)))
-          (org-use-tag-inheritance t)
-          (tags  (mapconcat  #'substring-no-properties
-                             (org-get-tags-at (point))
-                             ", ")))
-      (org-bib--goto-bibtex key)
-      (bibtex-search-entry key)
-      (let ((found (bibtex-search-forward-field "tags" t)))
-        (when found
-          (goto-char (car (cdr found)))
-          (bibtex-kill-field)))
-      (bibtex-make-field (list "tags" nil tags) t))))
+    (let* ((note (format "%s::#%s:note" (buffer-file-name) key))
+           (file (org-bib--get-file key))
+           (org-use-tag-inheritance t)
+           (tags  (mapconcat #'substring-no-properties
+                             (org-get-tags (point)) ", ")))
+
+      (org-bib--set-bibitem-field key "tags" tags)
+
+      (if file
+          (org-bib--set-bibitem-field key "file" (file-name-nondirectory file)))
+      
+      (if (org-bib--has-note key)
+          (org-bib--set-bibitem-field key "note" note)
+        (org-bib--del-bibitem-field key "note")))))
 
 (defun org-bib--update (&optional key)
   "Update entry KEY (header, properties and tags)"
 
-  (org-bib--update-header key)
-  (org-bib--update-properties key)
-  (org-bib--update-tags key))
+  (let ((key (or key (org-bib--key-at-point))))
+    (org-bib--update-headerline key)
+    (org-bib--update-properties key)
+    (org-bib--update-bibitem key)))
 
 (defun org-bib--doi-from-pdf (pdf)
   "Extract doi from a PDF filename."
@@ -402,7 +436,7 @@ bibitem and there are also a :key and :type fields."
       ;; First method: parse metadata using exiftool
       (let ((found))
         (shell-command (format "%s %s"
-                               org-bib-exiftool
+                               org-bib-exiftool-path
                                (shell-quote-argument pdf)))
         (with-current-buffer "*Shell Command Output*"
           (goto-char (point-min))
@@ -415,7 +449,7 @@ bibitem and there are also a :key and :type fields."
       ;; Second method: parse first PDF page (using pdftotext) and search DOI
       (let ((found))
         (shell-command (format "%s -f 1 -l 1 -enc UTF-8 %s - | grep -i doi"
-                               org-bib-pdftotext
+                               org-bib-pdftotext-path
                                (shell-quote-argument pdf)))
         (with-current-buffer "*Shell Command Output*"
           (goto-char (point-min))
@@ -424,7 +458,6 @@ bibitem and there are also a :key and :type fields."
         (when found
           (switch-to-buffer buffer)
           (throw 'found found))))))
-
 
 (defun org-bib--get-crossref-info (doi)
   "Retrieve bibtex item using crossref information and DOI."
@@ -458,11 +491,19 @@ bibitem and there are also a :key and :type fields."
          (title (with-temp-buffer (insert bibitem)
                                   (org-bib--bibitem-get "title")))
          (entry (concat
-                 (format "** Temporary header (will be updated)\n")
-                 (format ":PROPERTIES:\n:KEY: %s\n:END:\n" key)
-                 (format "#+begin_src bibtex\n%s#+end_src\n" bibitem)
-                 (format "*** Abstract\n\n")
-                 (format "*** Notes\n\n")))
+                 "** Temporary header (will be updated)\n"
+                 ":PROPERTIES:\n"
+                 (format ":CUSTOM_ID: %s\n" key)
+                 (format ":KEY: %s\n" key)
+                 ":END:\n"
+                 "#+begin_src bibtex\n"
+                 bibitem
+                 "#+end_src\n"
+                 "*** Abstract\n"
+                 ":PROPERTIES:\n"
+                 (format ":CUSTOM_ID: %s:abstract\n" key)
+                 ":END:\n"
+                 "\n"))
          (filename (concat (file-name-as-directory (nth 0 org-bib-library-paths))
                            (format "%s - %s.pdf" year title))))
 
@@ -534,7 +575,7 @@ By default, all subentries are counted; restrict with LEVEL."
 ;; https://ivanaf.com/emacs_drag-drop_pdfs_paste_html_custom_templates.html
 (defun org-bib--file-insert (uri)
   (if (string= (substring uri 0 7) "file://")
-      (org-bib--new-from-pdf (dnd-unescape-uri (substring uri 7)))))
+      (org-bib--new-from-pdf (dnd--unescape-uri (substring uri 7)))))
 (defun org-bib--file-dnd-fallback (uri action)
   (let ((dnd-protocol-alist
          (rassq-delete-all 'org-bib--file-dnd-protocol
@@ -561,7 +602,6 @@ By default, all subentries are counted; restrict with LEVEL."
     (if (eq action 'metadata)
         `(metadata (display-sort-function . ,#'identity))
       (complete-with-action action completions string pred))))
-
 (defun org-bib--selection-item ()
   "Build a selection item as (key . title)"
   
@@ -570,7 +610,6 @@ By default, all subentries are counted; restrict with LEVEL."
          (key (org-element-property :KEY element))
          (title (concat "— " (org-element-property :TITLE element))))
     (if key `(,key . ,title))))
-                
 (defun org-bib--selection ()
   "Select an entry from it s KEY."
   
@@ -587,11 +626,11 @@ By default, all subentries are counted; restrict with LEVEL."
                      (org-bib--completion collection))))
 
 
-(defun org-bib-goto ()
+(defun org-bib-goto (&optional key)
   "Move point to entry KEY, at header start."
 
   (interactive)
-  (let ((key (org-bib--selection)))
+  (let ((key (or key (org-bib--key-at-point))))
     (org-bib--goto key)
     (org-reveal)
     (org-show-entry)
@@ -605,17 +644,20 @@ By default, all subentries are counted; restrict with LEVEL."
     (org-bib--goto-abstract key)
     (org-reveal)
     (org-show-entry)
-    (forward-line)))
+    (forward-line 4)))
 
 (defun org-bib-edit-note ()
   "Edit note for entry at point."
   
   (interactive)
   (let ((key (org-bib--key-at-point)))
-    (org-bib--goto-note key)
+    (if (not (org-bib--has-note key))
+        (org-bib--new-note key)
+      (progn
+        (org-bib--goto-note key)
+        (forward-line 4)))
     (org-reveal)
-    (org-show-entry)
-    (forward-line)))
+    (org-show-entry)))
 
 (defun org-bib-edit-keywords (keywords)
   "Set keywords for entry at point."
@@ -627,7 +669,7 @@ By default, all subentries are counted; restrict with LEVEL."
     (let ((key (org-bib--key-at-point)))
       (org-bib--goto key)
       (org-entry-put (point) "KEYWORDS" keywords)
-      (org-bib--goto-bibtex key)
+      (org-bib--goto-bibitem key)
       (bibtex-search-entry key)
       (when keywords
         (let ((found (bibtex-search-forward-field "keywords" t)))
@@ -642,7 +684,7 @@ By default, all subentries are counted; restrict with LEVEL."
   (interactive)
   (if (region-active-p)
       (org-map-entries #'org-bib--update "LEVEL=2" 'region)
-    (org-bib--update)))
+    (org-bib--update (org-bib--key-at-point))))
 
 
 ;; Make a new entry from a PDF
@@ -685,24 +727,14 @@ By default, all subentries are counted; restrict with LEVEL."
          (concat (file-name-sans-extension (expand-file-name (buffer-name)))
                  ".bib")))
     (org-babel-tangle nil bibfile "bibtex")
-    (message "Bibliography exported to %s" bibfile)))
-
-
-;; Bitmap to indicate matched entries (following search)
-(define-fringe-bitmap 'chevron-right
-  [#b011000000
-   #b001100000
-   #b000110000
-   #b000011000
-   #b000110000
-   #b001100000
-   #b011000000] 7 9 '(center nil))
+    (message "Bibliography exported to %s" bibfile)
+    (citar-refresh)))
 
 ;; Search entries
 (defun org-bib-search (match)
-  (interactive "MSearch: ")
+  (interactive
+   (list (read-from-minibuffer "Search: ")))
 
-  (set-window-fringes nil 5 0)
   (remove-overlays nil nil 'org-bib-mark t)
   (unless (string= match "")
     (let ((matcher (cdr (org-make-tags-matcher match t))))
@@ -716,25 +748,20 @@ By default, all subentries are counted; restrict with LEVEL."
                 (overlay-put overlay 'org-bib-mark t)
                 (if (apply matcher '(nil nil 2))
                     (progn
-                      (setq count (+ count 1))
-                      ;; (overlay-put overlay 'face 'nano-subtle)
-                      ;;(overlay-put overlay 'face '(:foreground "black"
-                      ;; :inherit 'nano-subtle))
-                       (overlay-put overlay 'before-string
-                                    (propertize ">" 'display 
-                                                (list 'left-fringe
-                                                      'chevron-right
-                                                      'default)))
-                      )
-                  (overlay-put overlay 'face 'font-lock-comment-face)))))
+                      (overlay-put overlay 'before-string
+                                   (propertize "!" 'display 
+                                               (list 'left-fringe 'right-arrow 'nano-popout)))
+                      (setq count (+ count 1)))
+                  (progn
+                    (overlay-put overlay 'face 'font-lock-comment-face)
+                    )))))
           (if (> count 0)
               (message (format "%d match(es)" count))
             (message "No match")))))))
 
-
 (define-minor-mode org-bib-mode
-  "Minor mode for litetate & annotated bibliography" t
-
+  "Minor mode for litetate & annotated bibliography"
+  :initial-value t
   :lighter    "org-bib"
   :keymap     `((,(kbd "C-c C-g") . org-bib-goto)
                 (,(kbd "C-c C-a") . org-bib-edit-abstract)
@@ -745,7 +772,9 @@ By default, all subentries are counted; restrict with LEVEL."
                 (,(kbd "C-c C-e") . org-bib-export)
                 (,(kbd "C-c C-s") . org-bib-search)
                 (,(kbd "C-c C-u") . org-bib-update))
-  (if org-bib-mode (org-bib-mode-on) (org-bib-mode-off)))
+  (if org-bib-mode
+      (org-bib-mode-off)
+    (org-bib-mode-on)))
 
 (defun org-bib-mode-off ()
   "Uninstall org bib mode"
@@ -758,10 +787,12 @@ By default, all subentries are counted; restrict with LEVEL."
   (org-mode)
   (org-indent-mode)
   (org-hide-block-all)
-  ;; (visual-line-mode 0)
-  (define-key (current-global-map)
-    [remap org-shifttab] #'org-bib-shifttab)
   
+  ;; (visual-line-mode 0)
+;;  (define-key (current-global-map)
+;;    [remap org-shifttab] #'org-bib-shifttab)
+;;  (global-set-key (kbd "S-<tab>") #'org-shifttab)
+
   (setq-local org-refile-targets `( (,(buffer-name) :maxlevel . 1)))
   (setq-local org-cycle-separator-lines 2)
   (setq-local org-agenda-files (list (buffer-name)))
@@ -769,22 +800,29 @@ By default, all subentries are counted; restrict with LEVEL."
 
   (setq org-image-actual-width `( ,(truncate (* (frame-pixel-width) 0.85))))
   (setq org-startup-with-inline-images t)
-
+  (setq-local line-spacing 1)
+  
   ;; (face-remap-add-relative 'org-level-1 :foreground "black")
+  ;; (face-remap-set-base 'org-level-1 :inherit 'nano-strong)
+  ;; (face-remap-set-base 'org-tag :inherit 'nano-popout)
   (face-remap-set-base 'org-level-2 :inherit 'default)
   (setq-local org-tags-column 1)
+  ;; (setq x-use-underline-position-properties nil)
+  ;; (setq x-underline-at-descent-line nil)
+  ;; (setq underline-minimum-offset 8)
   ;; (fringe-mode '(5 . 0))
-  (set-window-fringes nil 5 0)
-                      
+  (set-window-fringes nil 8 0)
+
   ;; Set bibtex key format
   (setq bibtex-autokey-titleword-length 0
-        bibtex-autokey-name-year-separator ":"
-        bibtex-autokey-name-case-convert-function 'capitalize
-        bibtex-autokey-year-length 4
-        bibtex-autokey-names 1
-        bibtex-autokey-titleword-separator ""
-        bibtex-autokey-year-title-separator ""
-        bibtex-autokey-edit-before-use nil)
+         bibtex-autokey-name-year-separator ":"
+         bibtex-autokey-name-case-convert-function 'capitalize
+         bibtex-autokey-year-length 4
+         bibtex-autokey-names 1
+         bibtex-autokey-titleword-separator ""
+         bibtex-autokey-year-title-separator ""
+         bibtex-autokey-edit-before-use nil)
+
 
   ;; We removed the required-fields to avoir error when retrieving an
   ;; entry from biorxiv
@@ -804,14 +842,18 @@ By default, all subentries are counted; restrict with LEVEL."
   (add-to-list 'dnd-protocol-alist
                '("^file:" . org-bib--file-dnd-protocol))
 
-  (load-library "bibtex"))
+  (font-lock-add-keywords 'org-bib-mode
+    '(("\\(^\\*\\*\\) " 1 '(face nano-faded display "-") prepend)) 'append)
+
+  ;; (load-library "bibtex")
+  )
 
 (defun org-bib ()
   "Open default library."
 
   (interactive)
   (find-file org-bib-default-library)
-  (org-bib-mode 1))
+  (org-bib-mode t))
 
 (provide 'org-bib)
 ;;; org-bib-mode.el ends here
