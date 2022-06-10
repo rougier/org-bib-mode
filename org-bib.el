@@ -37,6 +37,7 @@
 ;;; Code:
 (require 'org)
 (require 'bibtex)
+(require 'url)
 
 
 ;; Configuration
