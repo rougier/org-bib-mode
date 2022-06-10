@@ -330,6 +330,10 @@ bibitem and there are also a :key and :type fields."
         (:month .        ,(org-bib--bibitem-get "month"))
         (:publisher .    ,(org-bib--bibitem-get "publisher"))))))
 
+(defvar org-bib-url-icon "")
+(defvar org-bib-doi-icon "")
+(defvar org-bib-filename-icon "")
+
 (defun org-bib--format-header (&optional key)
   "Formatted org Header org for entry KEY. This should be configurable."
   
@@ -339,9 +343,9 @@ bibitem and there are also a :key and :type fields."
          (filename (org-bib--get-file key))
          (url      (org-bib--get-url key))
          (doi      (org-bib--get-doi key))
-         (prefix   (cond (filename (format "[[%s][]]" filename))
-                         (url      (format "[[%s][]]" url))
-                         (doi      (format "[[%s][]]" (concat "http://dx.doi.org/" doi)))
+         (prefix   (cond (filename (format "[[%s][%s]]" filename org-bib-filename-icon))
+                         (url      (format "[[%s][%s]]" url org-bib-url-icon))
+                         (doi      (format "[[%s][%s]]" (concat "http://dx.doi.org/" doi) org-bib-doi-icon))
                          (t        " "))))
     (format "** %s %s (%s)" prefix title year)))
 
