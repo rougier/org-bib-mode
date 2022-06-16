@@ -1,0 +1,95 @@
+*Literate & annotated bibliography* — Nicolas P. Rougier
+
+*NOTE* This literate and annotated bibliography is an adaptation of the idea 
+[[http://cachestocaches.com/2020/3/org-mode-annotated-bibliography/][Managing my Annotated Bibliography with Emacs' Org Mode]] by [[http://gjstein.com/][Gregory J Stein]].
+
+* Introduction
+
+The core idea behind literate bibliography is to have a single structured file where each entry corresponds to a reference. Information concerning an entry is stored as properties and two subsections allow to enter abstract and notes. To ease the manipulation, org-bib-mode provides a sidebar menu that displays the list of bibliograpic entries and provide tools to ease navigation. Under the hood, the org-bib-mode is the union of two  modes:
+
+- [[https://github.com/rougier/pdf-drop-mode][pdf-drop-mode]] that allow to drag and drop a file in order to add it to the bibliography using its doi that is searched automatically.
+- [[https://github.com/rougier/org-imenu/][org-imenu]] that allow to easily nagivate among entries and allowing various operations such as filtering entries, moving entries, etc.
+
+org-bib mode is meant to be simple and robust (it is simple but not yet robust). If you need somethign more elaborated, have a look at the
+amazing [[https://github.com/jkitchin/org-ref][org-ref]] mode by John Kitchin.
+
+* Installation
+
+org-bib mode depends on [[https://github.com/rougier/pdf-drop-mode][pdf-drop-mode]] and [[https://github.com/rougier/org-imenu/][org-imenu]] that needs to be installed. For example using [[https://github.com/radian-software/straight.el][straight.el]]:
+
+#+begin_src emacs-lisp
+
+(straight-use-package
+ '(org-imenu :type git :host github :repo "rougier/org-imenu"))
+
+(straight-use-package
+ '(pdf-drop-mode :type git :host github :repo "rougier/pdf-drop-mode"))
+
+#+end_src
+
+* Configuration
+
+The minimal document structure is a document with a single level headline that is used to store new entries. It is configurable via the [[help:org-bib-unsorted-header][org-bib-unsorted-header]] variable (default is "Unsorted"). While not strictly necessary but highly recommended, you can also add a local mode line variable telling emacs to use org-bib mode when opening the file:
+
+#+begin_example
+  ;; -*- mode: org-bib-mode -*-
+  * Unsorted
+#+end_example
+
+You need to ensure [[help:pdf-drop-exitftool-path][pdf-drop-exiftool-path]] and [[help:org-drop-pdttotext-path][pdf-drop-pdftotext-path]] points to relevant binaries (these are needed to extract information from
+PDF metadata (exiftool) or PDF content (pdftotext)). Last step is to tell org-bib where to store PDFs. This is done via the [[help:org-bib-library-path][org-bib-library-path]].
+
+* Key bindings
+
+- "i" : show information
+- "a" : show abstract
+- "n" : show notes
+- "p" : show PDF (if available)
+- "b" : show bibtex
+
+- "f" : filter visible entries
+- "e" : export bibliography
+- "m" : Move entry (refile)
+- "<return>" : go to entry
+
+- "<tab>" : toggle current section folding status
+- "<S-tab>" : toggle all sections folding status
+
+- "v i" : set view mode to info
+- "v a" : set view mode to abstract
+- "v n" : set view mode to notes
+- "v p" : set view mode to PDF
+- "v b" : set view mode to bibtex
+- "v <return>" : exit view mode
+  
+- "?" : Mark entry as unread
+- "!" : Mark entry as read
+- "+" : Increase menu depth
+- "-" : Decreaase menu depth
+
+* *Adding an entry*
+
+The simplest way to add a new entry is to drag and drop a PDF file onto the org buffer. The PDF will be parsed to try to identify a DOI and the corresponding bibtex item will be collected from the crossref.org server. The new entry will then be created below the *Unsorted* header (whose name is configurable) and the file will be renamed and copied to the library folder.
+
+If this procedure fails for some reason, you can also enter a new entry manually or using the [[help:org-bib-new-from-pdf][org-bib-from-pdf, ]][[help:org-bib-new-from-doi][org-bib-from-doi]] or [[help:org-bib-new-from-bibtex][org-bib-from-bibtex]] helper functions. In the latter case, no file will be automatically associated but you can later add a file into the library folder and rename it to "year - title.pdf" (replacing year and title with the actual year and title from the entry).
+
+* Edit an entry
+
+An entry is made of a properties block with two sub headlines (Abstract and Notes). You can edit any properties and add or remove them. But be careful to not remove bibliographic properties or else, the conversion to bibtex may fail because of some missing fields that are required.
+
+* *Export the bibliography*
+
+To export the library to a bib file, you can use the [[help:org-bib-export][org-bib-export]] command (that is bound to the "e" key on the sidebar).
+
+* Filter view
+
+You can filter the sidebar view ("f" key). Here are some example searches.
+Note the absence of spaces.
+
+Articles published in 1984:             YEAR=1984
+Articles published between 2000 & 2010: YEAR>1999+YEAR<2011
+Journal articles:                       TYPE={article}
+Papers by Knuth:                        AUTHOR={Knuth}
+Article published in a journal:         JOURNAL={The Computer Journal}
+
+See also [[https://orgmode.org/worg/org-tutorials/advanced-searching.html][Advanced searching]] from the org [[https://orgmode.org/][website]].
