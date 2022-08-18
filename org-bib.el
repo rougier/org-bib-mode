@@ -57,25 +57,10 @@
 (require 'org-imenu)
 (require 'pdf-drop-mode)
 
-;; #+LIBRARY-PATH: test.org
-;; #+LIBRARY-FILE: test.org
-;; (let ((library-path (org-collect-keywords '("LIBRARY-PATH")))
-;;       (library-file (org-collect-keywords '("LIBRARY-FILE")))))
-
 ;; ----------------------------------------------------------------------------
 (defgroup org-bib nil
   "Literate bibliography"
   :group 'applications)
-
-(defcustom org-bib-library-file "~/Documents/Papers/papers.org"
-  "Default library file (.org)"
-  :type 'file
-  :group 'org-bib)
-
-(defcustom org-bib-library-path "~/Documents/Papers"
-  "Path where to copy newly added files"
-  :type 'directory
-  :group 'org-bib)
 
 (defcustom org-bib-library-copy-file t
   "Whether to copy new entry files to the library"
@@ -112,12 +97,6 @@
   "Name for the unsorted section where new entries will be filed."
   :type 'string
   :group 'org-bib)
-
-(defvar org-bib--content-buffer nil
-  "Buffer holding the current library (org file)")
-
-(defvar org-bib--sidebar-buffer nil
-  "Buffer holding the sidebar menu (org imenu)")
 
 (defvar org-bib--refile-history '()
   "Dedicated refile history")
@@ -185,13 +164,16 @@
          (throw (format "Uknown id type (%s)" (car file-id)) nil )))
 
   (let* ((entry (car org-bibtex-entries))
+         (org-filename (buffer-file-name))
+         (library-path (or (cadar (org-collect-keywords '("LIBRARY-PATH")))
+                           (file-name-directory org-filename)))
          (target-file (cond ((not org-bib-library-copy-file)
                              source-file)
                             ((not org-bib-library-rename-file)
-                             (concat (file-name-as-directory org-bib-library-path)
+                             (concat (file-name-as-directory library-path)
                                      (file-name-nondirectory source-file)))
                             (t
-                             (concat (file-name-as-directory org-bib-library-path)
+                             (concat (file-name-as-directory library-path)
                                      (org-bib-filename-format entry))))))
 
     (setcar org-bibtex-entries
@@ -230,30 +212,30 @@
 
   (interactive)
   (when (member mode '(pdf url info abstract notes preview bibtex none))
-    (org-bib-entry-show mode)
+    (org-bib-view mode)
     (setq org-bib--view-mode-current mode)
     (force-mode-line-update)))
 
-(defun org-bib-entry-show (&optional mode)
-  "Show selected entry according to mode, one of 'info, 'abstract,
+(defun org-bib-view (&optional mode)
+  "View selected entry according to mode, one of 'info, 'abstract,
 'notes, 'pdf, 'bibtex or 'none"
   
   (interactive)
   (save-selected-window
     (save-excursion
       (let ((mode (or mode org-bib--view-mode-current)))
-        (cond ((eq mode 'info)     (org-bib-entry-goto-info))
-              ((eq mode 'abstract) (org-bib-entry-goto-abstract))
-              ((eq mode 'notes)    (org-bib-entry-goto-notes))
-              ((eq mode 'pdf)      (org-bib-entry-goto-pdf))
-              ((eq mode 'url)      (org-bib-entry-goto-url))
-              ((eq mode 'preview)  (org-bib-entry-goto-preview))
-              ((eq mode 'bibtex)   (org-bib-entry-goto-bibtex))
+        (org-bib-goto)
+        (cond ((eq mode 'abstract) (org-bib-view-abstract))
+              ((eq mode 'notes)    (org-bib-view-notes))
+              ((eq mode 'pdf)      (org-bib-view-pdf))
+              ((eq mode 'url)      (org-bib-view-url))
+              ((eq mode 'preview)  (org-bib-view-preview))
+              ((eq mode 'bibtex)   (org-bib-view-bibtex))
               (t                   nil))))))
 
 
-(defun org-bib-entry-goto ()
-  "Go to selected entry in the org buffer."
+(defun org-bib-goto ()
+  "Move point to the corresponding current item in the org buffer."
 
   (interactive)
   (let ((entry (imenu-list--find-entry)))
@@ -262,28 +244,23 @@
                         (get-text-property 0 'marker (car entry)))))
     (imenu-list--goto-entry entry)))
 
-(defun org-bib-entry-goto-info ()
-  "Go to selected entry info in the org buffer."
-  
-  (org-bib-entry-goto))
 
-(defun org-bib-entry-goto-abstract ()
-  "Go to selected entry abstract in the org buffer."
+(defun org-bib-view-abstract ()
+  "Narrow to abstract heading r for the current item."
   
-  (org-bib-entry-goto)
   (org-goto-first-child)
   (org-narrow-to-subtree)
   (goto-char (+ 2 (org-element-property :begin (org-element-at-point)))))
 
-(defun org-bib-entry-goto-notes ()
-  "Go to selected entry notes in the org buffer."
+
+(defun org-bib-view-notes ()
+  "Narrow to notes heading for the current item."
   
-  (org-bib-entry-goto)
+  (org-bib-goto)
   (org-goto-first-child)
   (org-goto-sibling)
-  (org-narrow-to-subtree)
-  (goto-char (+ 2 (org-element-property :begin (org-element-at-point)))))
-
+  (org-narrow-to-subtree))
+  
 
 (defun org-bib--preview (&optional with-abstract with-note)
   "Build a preview of the entry at point."
@@ -294,6 +271,7 @@
          (doi       (org-entry-get (point) "DOI"))
          (custom-id (org-entry-get (point) "CUSTOM_ID"))
          (year      (org-entry-get (point) "YEAR"))
+         (filename  (buffer-file-name imenu-list--displayed-buffer))
          (journal   (or (org-entry-get (point) "JOURNAL")
                        (org-entry-get (point) "CONFERENCE")
                        (if (string= (org-entry-get (point) "BTYPE") "book") "BOOK")
@@ -326,7 +304,7 @@
 
     (concat
      (propertize (format "[[file:%s::#%s:abstract][%s (%s)]]\n"
-                         org-bib-library-file  custom-id (upcase journal) year)
+                         filename  custom-id (upcase journal) year)
                  'face '(:inherit (nano-popout nano-strong) :height 0.85))
      (propertize (format "*%s*\n" title))
      (propertize (format "/%s/\n\n" author) 'face '(:inherit default :height 0.85))
@@ -346,10 +324,9 @@
         "\n")))))
 
 
-(defun org-bib-entry-goto-preview ()
-  "Go to selected entry preview in a dedicated preview buffer."
+(defun org-bib-view-preview ()
+  "View preview of current item in a dedicated preview buffer."
   
-  (org-bib-entry-goto)
   (let ((preview))
     (save-excursion
       (if (and (eq 1 (org-element-property :level (org-element-at-point)))
@@ -360,7 +337,7 @@
               (setq sibling (org-goto-sibling))))
         (setq preview (org-bib--preview t t))))
   
-    (other-window 1)
+;;    (other-window 1)
     (switch-to-buffer (get-buffer-create "*org-bib-preview*"))
     (let ((inhibit-read-only t))
       (delete-region (point-min) (point-max))
@@ -374,13 +351,13 @@
       (setq buffer-read-only t)
       (setq header-line-format nil)
       (goto-char (point-min))
-      (other-window 1))))
+;;      (other-window 1)
+      )))
   
   
-(defun org-bib-entry-goto-bibtex ()
-  "Go to selected entry bibtex in a dedicated buffer."
+(defun org-bib-view-bibtex ()
+  "View bibtex of current item in a dedicated buffer."
   
-  (org-bib-entry-goto)
   (let* ((custom-id (org-entry-get (point) "CUSTOM_ID"))
          (bibtex-buffer (format "*%s:bibtex*" custom-id)))
     (org-narrow-to-subtree)
@@ -392,72 +369,71 @@
       (bibtex-reformat))
     (switch-to-buffer bibtex-buffer)))
 
-(defun org-bib-entry-goto-pdf ()
-  "Go to selected entry pdf in the org buffer."
+(defun org-bib-view-pdf ()
+  "View PDF of current item in a dedicated buffer."
   
-  (org-bib-entry-goto)
   (when (org-entry-get (point) "FILENAME")
     (find-file (org-entry-get (point) "FILENAME"))))
 
-(defun org-bib-entry-goto-url ()
-  "Go to selected entry url using xwidgets."
+(defun org-bib-view-url ()
+  "View URL of current item (using xwidgets) in a dedicated buffer."
   
-  (org-bib-entry-goto)
   (when (org-entry-get (point) "URL")
     (xwidget-webkit-goto-url (org-entry-get (point) "URL"))
     (switch-to-buffer (xwidget-buffer (xwidget-webkit-current-session)))))
 
-(defun org-bib-entry-mark-read ()
+
+(defun org-bib-mark-read ()
   "Mark selected entry as read."
   
   (interactive)
   (save-selected-window
     (save-excursion
-      (org-bib-entry-goto)
+      (org-bib-goto)
       (org-entry-put (point) "STATUS" "READ")))
   (org-imenu-update))
 
-(defun org-bib-entry-mark-read-and-goto-next ()
+(defun org-bib-mark-read-and-goto-next ()
   "Mark selected entry as read."
   
   (interactive)
   (org-bib-entry-mark-read)
-  (org-bib-entry-next))
+  (org-bib-next))
 
-(defun org-bib-entry-mark-unread ()
+(defun org-bib-mark-unread ()
   "Mark selected imenu-entry as read."
   
   (interactive)
   (save-selected-window
     (save-excursion
-      (org-bib-entry-goto)
+      (org-bib-goto)
       (org-entry-put (point) "STATUS" "UNREAD")))
   (org-imenu-update))
 
-(defun org-bib-entry-mark-unread-and-goto-next ()
+(defun org-bib-mark-unread-and-goto-next ()
   "Mark selected imenu-entry as read."
   
   (interactive)
-  (org-bib-entry-mark-unread)
-  (org-bib-entry-next))
+  (org-bib-mark-unread)
+  (org-bib-next))
 
-(defun org-bib-entry-prev ()
+(defun org-bib-prev ()
   "Move to previous entry."
   
   (interactive)
   (with-current-buffer "*Ilist*"
     (previous-line))
-  (org-bib-entry-show))
+  (org-bib-view))
 
-(defun org-bib-entry-next ()
+(defun org-bib-next ()
   "Move to next entry."
     
   (interactive)
   (with-current-buffer "*Ilist*"
     (next-line))
-  (org-bib-entry-show))
+  (org-bib-view))
 
-(defun org-bib-entry-pdf-next-page ()
+(defun org-bib-pdf-next-page ()
   "Go to next page if a PDF is displayed"
 
   (interactive)
@@ -467,7 +443,7 @@
     (when (derived-mode-p 'pdf-view-mode)
       (pdf-view-next-page-command))))
 
-(defun org-bib-entry-pdf-prev-page ()
+(defun org-bib-pdf-prev-page ()
   "Go to previous page if a PDF is displayed"
   
   (interactive)
@@ -491,26 +467,28 @@
   
   (error "Not yet implemented"))
 
-(defun org-bib-entry-move ()
+(defun org-bib-move ()
   "Move entry to another section"
 
   (interactive)
   (save-selected-window
-    (org-bib-entry-goto)
+    (org-bib-goto)
+    (setq-local org-refile-targets `( (,(buffer-name) :maxlevel . 1)))
+    (setq-local org-agenda-files (list (buffer-name)))
     (let ((org-refile-history org-bib--refile-history))
-      (with-current-buffer org-bib--content-buffer
+      (with-current-buffer imenu-list--displayed-buffer
         (org-refile)
         (setq org-bib--refile-history org-refile-history)
         (org-imenu-update))
-      (org-bib-entry-goto)
-      (org-bib-entry-show))))
+      (org-bib-goto)
+      (org-bib-view))))
 
-(defun org-bib-entry-tag ()
+(defun org-bib-tag ()
   "Tag current entry "
 
   (interactive)
   (save-selected-window
-    (org-bib-entry-goto)
+    (org-bib-goto)
     (org-set-tags-command)
     (org-imenu-update)))
 
@@ -520,9 +498,13 @@
   (interactive)
   (save-selected-window
     (save-excursion
-      (with-current-buffer org-bib--content-buffer
-        (let ((filename (concat (file-name-sans-extension (buffer-file-name)) "." "bib")))
-          (org-bibtex filename))))))
+      (with-current-buffer imenu-list--displayed-buffer
+        (let ((filename (buffer-file-name))
+              (library-path (or (cadar (org-collect-keywords '("LIBRARY-PATH")))
+                                (file-name-directory filename)))
+              (library-file (or (cadar (org-collect-keywords '("LIBRARY-FILE")))
+                                (file-name-with-extension filename "bib"))))
+          (org-bibtex library-file))))))
 
 (defun org-bib--imenu-filter-format (oldfun element todo tags marker level)
   "Advice function that is used to modify face for unread entries."
@@ -534,57 +516,54 @@
                                 '(:inherit nano-salient) nil entry))
     entry))
 
+
 (defun org-bib-activate ()
   "Activates org-bib mode."
-
-  ;; We save the current buffer when entering mode to be able to manipulate it
-  ;; later since most actions are done through the sidebar buffer.
-  (setq org-bib--content-buffer (current-buffer)
-        org-bib--sidebar-buffer "*Ilist*")
 
   (setq org-bibtex-headline-format-function #'org-bib-headline-format)
   (setq pdf-drop-search-hook #'org-bib-pdf-process)
   (setq imenu-list-after-jump-hook #'org-tree-to-indirect-buffer)
   (advice-add 'org-imenu-filter-format :around #'org-bib--imenu-filter-format)
 
-  (with-current-buffer org-bib--content-buffer
+  (with-current-buffer (current-buffer)
     (setq-local org-refile-targets `( (,(buffer-name) :maxlevel . 1)))
     (setq-local org-agenda-files (list (buffer-name)))
     (pdf-drop-mode)
     (org-imenu))
 
-  (with-current-buffer org-bib--sidebar-buffer
+  (with-current-buffer "*Ilist*"
     (org-imenu-update)
-    (org-bib-entry-show)
+    (pdf-drop-mode)
+    (org-bib-view)
 
     ;; This prevents the default behavior to override our mouse binding
     (setq-local mouse-1-click-follows-link nil)
     
     (let ((map (current-local-map)))
-      (define-key map (kbd "<down-mouse-1>") #'org-bib-entry-show)
-      (define-key map (kbd "SPC") #'org-bib-entry-show-info)
-      (define-key map (kbd "RET") #'org-bib-entry-goto)
+      (define-key map (kbd "<down-mouse-1>") #'org-bib-view)
+      (define-key map (kbd "SPC") #'(lambda () (interactive) (org-bib-view 'info)))
+      (define-key map (kbd "RET") #'org-bib-goto)
       
-      (define-key map (kbd "<down>") #'org-bib-entry-next)
-      (define-key map (kbd "<up>")   #'org-bib-entry-prev)
+      (define-key map (kbd "<down>") #'org-bib-next)
+      (define-key map (kbd "<up>")   #'org-bib-prev)
 
-      (define-key map (kbd "<left>")   #'org-bib-entry-pdf-prev-page)
-      (define-key map (kbd "<right>")  #'org-bib-entry-pdf-next-page)
+      (define-key map (kbd "<left>")   #'org-bib-pdf-prev-page)
+      (define-key map (kbd "<right>")  #'org-bib-pdf-next-page)
 
-      (define-key map (kbd "!") #'org-bib-entry-mark-read-and-goto-next)
-      (define-key map (kbd "?") #'org-bib-entry-mark-unread-and-goto-next)
+      (define-key map (kbd "!") #'org-bib-mark-read-and-goto-next)
+      (define-key map (kbd "?") #'org-bib-mark-unread-and-goto-next)
 
-      (define-key map (kbd "m") #'org-bib-entry-move)
+      (define-key map (kbd "m") #'org-bib-move)
       (define-key map (kbd "e") #'org-bib-export)
-      (define-key map (kbd "t") #'org-bib-entry-tag)
+      (define-key map (kbd "t") #'org-bib-tag)
       
-      (define-key map (kbd "p") #'(lambda () (interactive) (org-bib-entry-show 'pdf)))
-      (define-key map (kbd "u") #'(lambda () (interactive) (org-bib-entry-show 'url)))
-      (define-key map (kbd "i") #'(lambda () (interactive) (org-bib-entry-show 'info)))
-      (define-key map (kbd "n") #'(lambda () (interactive) (org-bib-entry-show 'notes)))
-      (define-key map (kbd "b") #'(lambda () (interactive) (org-bib-entry-show 'bibtex)))
-      (define-key map (kbd "=") #'(lambda () (interactive) (org-bib-entry-show 'preview)))
-      (define-key map (kbd "a") #'(lambda () (interactive) (org-bib-entry-show 'abstract)))
+      (define-key map (kbd "p") #'(lambda () (interactive) (org-bib-view 'pdf)))
+      (define-key map (kbd "u") #'(lambda () (interactive) (org-bib-view 'url)))
+      (define-key map (kbd "i") #'(lambda () (interactive) (org-bib-view 'info)))
+      (define-key map (kbd "n") #'(lambda () (interactive) (org-bib-view 'notes)))
+      (define-key map (kbd "b") #'(lambda () (interactive) (org-bib-view 'bibtex)))
+      (define-key map (kbd "=") #'(lambda () (interactive) (org-bib-view 'preview)))
+      (define-key map (kbd "a") #'(lambda () (interactive) (org-bib-view 'abstract)))
 
       (define-key map (kbd "v p")   #'(lambda () (interactive) (org-bib-view-mode 'pdf)))
       (define-key map (kbd "v RET") #'(lambda () (interactive) (org-bib-view-mode 'none)))
@@ -594,19 +573,32 @@
       (define-key map (kbd "v =")   #'(lambda () (interactive) (org-bib-view-mode 'preview)))
       (define-key map (kbd "v a")   #'(lambda () (interactive) (org-bib-view-mode 'abstract))))))
 
+
 (defun org-bib-inactivate ()
   "Inactivates org-bib mode."
 
+  ;; Restore default org-bibtex headline format
   (setq org-bibtex-headline-format-function #'(lambda (entry) (cdr (assq :title entry))))
+
+  ;; Remove our special filter
   (advice-remove 'org-imenu-filter-format #'org-bib--imenu-filter-format)
+
+  ;; Remove our hook on pdf drop
   (setq pdf-drop-search-hook nil)
-  (org-imenu-quit)
-  (with-current-buffer org-bib--content-buffer
+
+  ;; Deactivate pdf-drop mode on org buffer and widen it
+  (with-current-buffer imenu-list--displayed-buffer
     (pdf-drop-mode -1)
-    (widen)))
+    (widen))
+
+  ;; Quit org-imenu
+  (org-imenu-quit))
+
+
 
 (define-minor-mode org-bib-mode
   "Minor mode for litetate & annotated bibliography"
+  
   :initial-value t
   :global nil
   :lighter "org-bib"
