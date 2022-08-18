@@ -48,43 +48,19 @@
 
 ;; Emacs core
 (require 'org)
+(require 'ol-bibtex)
 (require 'org-indent)
 (require 'org-element)
-(require 'ol-bibtex)
+(require 'xwidget)
 
 ;; Needs installation
 (require 'org-imenu)
 (require 'pdf-drop-mode)
 
-;; ----------------------------------------------------------------------------
-(setq bibtex-autokey-titleword-length 0
-      bibtex-autokey-name-year-separator ":"
-      bibtex-autokey-name-case-convert-function 'capitalize
-      bibtex-autokey-year-length 4
-      bibtex-autokey-names 1
-      bibtex-autokey-titleword-separator ""
-      bibtex-autokey-year-title-separator ""
-      bibtex-autokey-edit-before-use nil
-      imenu-list-position 'left
-      imenu-list-size 100
-      org-imenu-depth 2
-      org-image-actual-width `( ,(truncate (* (frame-pixel-width) 0.85)))
-      org-startup-with-inline-images t)
-
-;; (setq header-line-format
-;;       '(:eval
-;;         (nano-modeline-render nil
-;;                               (buffer-name imenu-list--displayed-buffer)
-;;                               (format "(view mode: %s, filter: %s)"
-;;                                       (if (eq org-bib--view-mode-current 'none)
-;;                                           "-"
-;;                                         org-bib--view-mode-current)
-;;                                       (if (eq org-imenu-filter-string "*")
-;;                                           "-"
-;;                                         org-imenu-filter-string))
-;;                               "")))
-;; (face-remap-add-relative 'hl-line :inherit 'nano-strong-i)
-   
+;; #+LIBRARY-PATH: test.org
+;; #+LIBRARY-FILE: test.org
+;; (let ((library-path (org-collect-keywords '("LIBRARY-PATH")))
+;;       (library-file (org-collect-keywords '("LIBRARY-FILE")))))
 
 ;; ----------------------------------------------------------------------------
 (defgroup org-bib nil
@@ -111,10 +87,11 @@
   :type 'boolean
   :group 'org-bib)
 
-(defcustom org-bib-view-mode-default 'info
+(defcustom org-bib-view-mode-default 'preview
   "Initial view mode."
   :type '(radio (const :tag "None"        none)
                 (const :tag "Bibtex"      bibtex)
+                (const :tag "Preview"     preview)
                 (const :tag "Abstract"    abstract)
                 (const :tag "Notes"       notes)
                 (const :tag "PDF"         PDF)
@@ -145,7 +122,7 @@
 (defvar org-bib--refile-history '()
   "Dedicated refile history")
 
-(defvar org-bib--view-mode-current nil
+(defvar org-bib--view-mode-current org-bib-view-mode-default
   "Current view mode")
 
 ;; This could be user configurable
@@ -248,30 +225,14 @@
     (org-imenu-update)))
 
 (defun org-bib-view-mode (mode)
-  "Set view mode, one of 'info, 'abstract, 'notes, 'pdf, 'bibtex or
-'none."
+  "Set view mode, one of 'info, 'abstract, 'notes, 'pdf, 'bibtex,
+'url, 'preview or 'none."
 
   (interactive)
-  (cond ((eq mode 'info)     (org-bib-entry-show-info)
-                             (setq org-bib--view-mode-current 'info))
-        ((eq mode 'abstract) (org-bib-entry-show-abstract)
-                             (setq org-bib--view-mode-current 'abstract))
-        ((eq mode 'notes)    (org-bib-entry-show-notes)
-                             (setq org-bib--view-mode-current 'notes))
-        ((eq mode 'pdf)      (org-bib-entry-show-pdf)
-                             (setq org-bib--view-mode-current 'pdf))
-        ((eq mode 'bibtex)   (org-bib-entry-show-bibtex)
-                             (setq org-bib--view-mode-current 'bibtex))
-        (t                   (setq org-bib--view-mode-current 'none)))
-  (force-mode-line-update))
-
-;; Aliases
-(defun org-bib-view-mode-pdf ()      (interactive) (org-bib-view-mode 'pdf))
-(defun org-bib-view-mode-info ()     (interactive) (org-bib-view-mode 'info))
-(defun org-bib-view-mode-none ()     (interactive) (org-bib-view-mode 'none))
-(defun org-bib-view-mode-notes ()    (interactive) (org-bib-view-mode 'notes))
-(defun org-bib-view-mode-bibtex ()   (interactive) (org-bib-view-mode 'bibtex))
-(defun org-bib-view-mode-abstract () (interactive) (org-bib-view-mode 'abstract))
+  (when (member mode '(pdf url info abstract notes preview bibtex none))
+    (org-bib-entry-show mode)
+    (setq org-bib--view-mode-current mode)
+    (force-mode-line-update)))
 
 (defun org-bib-entry-show (&optional mode)
   "Show selected entry according to mode, one of 'info, 'abstract,
@@ -285,16 +246,10 @@
               ((eq mode 'abstract) (org-bib-entry-goto-abstract))
               ((eq mode 'notes)    (org-bib-entry-goto-notes))
               ((eq mode 'pdf)      (org-bib-entry-goto-pdf))
+              ((eq mode 'url)      (org-bib-entry-goto-url))
+              ((eq mode 'preview)  (org-bib-entry-goto-preview))
               ((eq mode 'bibtex)   (org-bib-entry-goto-bibtex))
               (t                   nil))))))
-
-;; Aliases
-(defun org-bib-entry-show-pdf ()      (interactive) (org-bib-entry-show 'pdf))
-(defun org-bib-entry-show-info ()     (interactive) (org-bib-entry-show 'info))
-(defun org-bib-entry-show-none ()     (interactive) (org-bib-entry-show 'none))
-(defun org-bib-entry-show-notes ()    (interactive) (org-bib-entry-show 'notes))
-(defun org-bib-entry-show-bibtex ()   (interactive) (org-bib-entry-show 'bibtex))
-(defun org-bib-entry-show-abstract () (interactive) (org-bib-entry-show 'abstract))
 
 
 (defun org-bib-entry-goto ()
@@ -317,7 +272,8 @@
   
   (org-bib-entry-goto)
   (org-goto-first-child)
-  (org-narrow-to-subtree))
+  (org-narrow-to-subtree)
+  (goto-char (+ 2 (org-element-property :begin (org-element-at-point)))))
 
 (defun org-bib-entry-goto-notes ()
   "Go to selected entry notes in the org buffer."
@@ -325,8 +281,102 @@
   (org-bib-entry-goto)
   (org-goto-first-child)
   (org-goto-sibling)
-  (org-narrow-to-subtree))
+  (org-narrow-to-subtree)
+  (goto-char (+ 2 (org-element-property :begin (org-element-at-point)))))
 
+
+(defun org-bib--preview (&optional with-abstract with-note)
+  "Build a preview of the entry at point."
+  
+  (let* ((author    (or (org-entry-get (point) "AUTHOR")
+                        (org-entry-get (point) "EDITOR")))
+         (title     (org-entry-get (point) "TITLE"))
+         (doi       (org-entry-get (point) "DOI"))
+         (custom-id (org-entry-get (point) "CUSTOM_ID"))
+         (year      (org-entry-get (point) "YEAR"))
+         (journal   (or (org-entry-get (point) "JOURNAL")
+                       (org-entry-get (point) "CONFERENCE")
+                       (if (string= (org-entry-get (point) "BTYPE") "book") "BOOK")
+                       (if (member "PREPRINT" (org-get-tags)) "PREPRINT")
+                       "ONLINE"))
+         (abstract (when with-abstract
+                     (save-excursion
+                       (org-goto-first-child)
+                       (let* ((element (org-element-at-point))
+                              (beg (org-element-property :robust-begin element))
+                              (end (org-element-property :robust-end element)))
+                         (if (and beg end)
+                             (buffer-substring-no-properties beg (+ end 1)))))))
+         (abstract (if abstract
+                       (string-trim abstract)
+                     "None."))
+         
+         (notes (when with-note
+                  (save-excursion
+                    (org-goto-first-child)
+                    (org-goto-sibling)
+                    (let* ((element (org-element-at-point))
+                           (beg (org-element-property :robust-begin element))
+                           (end (org-element-property :robust-end element)))
+                      (if (and beg end)
+                          (buffer-substring-no-properties beg (+ end 1)))))))
+         (notes (if notes
+                    (string-trim notes)
+                  "None.")))
+
+    (concat
+     (propertize (format "[[file:%s::#%s:abstract][%s (%s)]]\n"
+                         org-bib-library-file  custom-id (upcase journal) year)
+                 'face '(:inherit (nano-popout nano-strong) :height 0.85))
+     (propertize (format "*%s*\n" title))
+     (propertize (format "/%s/\n\n" author) 'face '(:inherit default :height 0.85))
+     (when with-abstract
+       (concat
+        (propertize "*Abstract.* " 'face 'bold)
+        (if abstract
+            (propertize abstract 'face '(:inherit nano-default))
+          "")
+        "\n\n"))
+     (when with-note
+       (concat
+        (propertize "*Notes.* " 'face 'bold)
+        (if notes
+            (propertize notes 'face '(:inherit nano-default))
+          "")
+        "\n")))))
+
+
+(defun org-bib-entry-goto-preview ()
+  "Go to selected entry preview in a dedicated preview buffer."
+  
+  (org-bib-entry-goto)
+  (let ((preview))
+    (save-excursion
+      (if (and (eq 1 (org-element-property :level (org-element-at-point)))
+               (org-goto-first-child))
+          (let ((sibling t))
+            (while sibling
+              (setq preview (concat preview (org-bib--preview)))
+              (setq sibling (org-goto-sibling))))
+        (setq preview (org-bib--preview t t))))
+  
+    (other-window 1)
+    (switch-to-buffer (get-buffer-create "*org-bib-preview*"))
+    (let ((inhibit-read-only t))
+      (delete-region (point-min) (point-max))
+      (insert preview)
+      (visual-line-mode)
+      (hl-line-mode)
+      (org-mode)
+      (setq-local cursor-type nil)
+      (setq org-image-actual-width (list (window-width nil t)))
+      (setq-local org-return-follows-link t)
+      (setq buffer-read-only t)
+      (setq header-line-format nil)
+      (goto-char (point-min))
+      (other-window 1))))
+  
+  
 (defun org-bib-entry-goto-bibtex ()
   "Go to selected entry bibtex in a dedicated buffer."
   
@@ -348,6 +398,14 @@
   (org-bib-entry-goto)
   (when (org-entry-get (point) "FILENAME")
     (find-file (org-entry-get (point) "FILENAME"))))
+
+(defun org-bib-entry-goto-url ()
+  "Go to selected entry url using xwidgets."
+  
+  (org-bib-entry-goto)
+  (when (org-entry-get (point) "URL")
+    (xwidget-webkit-goto-url (org-entry-get (point) "URL"))
+    (switch-to-buffer (xwidget-buffer (xwidget-webkit-current-session)))))
 
 (defun org-bib-entry-mark-read ()
   "Mark selected entry as read."
@@ -388,8 +446,7 @@
   
   (interactive)
   (with-current-buffer "*Ilist*"
-    (forward-line -1)
-    (goto-char (line-beginning-position)))
+    (previous-line))
   (org-bib-entry-show))
 
 (defun org-bib-entry-next ()
@@ -397,8 +454,7 @@
     
   (interactive)
   (with-current-buffer "*Ilist*"
-    (forward-line)
-    (goto-char (line-beginning-position)))
+    (next-line))
   (org-bib-entry-show))
 
 (defun org-bib-entry-pdf-next-page ()
@@ -412,7 +468,7 @@
       (pdf-view-next-page-command))))
 
 (defun org-bib-entry-pdf-prev-page ()
-  "Go toprevious page if a PDF is displayed"
+  "Go to previous page if a PDF is displayed"
   
   (interactive)
   (save-selected-window
@@ -449,6 +505,15 @@
       (org-bib-entry-goto)
       (org-bib-entry-show))))
 
+(defun org-bib-entry-tag ()
+  "Tag current entry "
+
+  (interactive)
+  (save-selected-window
+    (org-bib-entry-goto)
+    (org-set-tags-command)
+    (org-imenu-update)))
+
 (defun org-bib-export ()
   "Export library to a bibtex file"
   
@@ -466,7 +531,7 @@
          (entry (apply oldfun (list element todo tags marker level))))
     (if (and (string= status "UNREAD") (= level 2))
         (add-face-text-property 0 (length entry)
-                                '(:inherit bold) nil entry))
+                                '(:inherit nano-salient) nil entry))
     entry))
 
 (defun org-bib-activate ()
@@ -481,7 +546,6 @@
   (setq pdf-drop-search-hook #'org-bib-pdf-process)
   (setq imenu-list-after-jump-hook #'org-tree-to-indirect-buffer)
   (advice-add 'org-imenu-filter-format :around #'org-bib--imenu-filter-format)
-  (setq org-bib--view-mode-current org-bib-view-mode-default)
 
   (with-current-buffer org-bib--content-buffer
     (setq-local org-refile-targets `( (,(buffer-name) :maxlevel . 1)))
@@ -512,19 +576,23 @@
 
       (define-key map (kbd "m") #'org-bib-entry-move)
       (define-key map (kbd "e") #'org-bib-export)
+      (define-key map (kbd "t") #'org-bib-entry-tag)
       
-      (define-key map (kbd "i") #'org-bib-entry-show-info)
-      (define-key map (kbd "p") #'org-bib-entry-show-pdf)
-      (define-key map (kbd "n") #'org-bib-entry-show-notes)
-      (define-key map (kbd "b") #'org-bib-entry-show-bibtex)
-      (define-key map (kbd "a") #'org-bib-entry-show-abstract)
+      (define-key map (kbd "p") #'(lambda () (interactive) (org-bib-entry-show 'pdf)))
+      (define-key map (kbd "u") #'(lambda () (interactive) (org-bib-entry-show 'url)))
+      (define-key map (kbd "i") #'(lambda () (interactive) (org-bib-entry-show 'info)))
+      (define-key map (kbd "n") #'(lambda () (interactive) (org-bib-entry-show 'notes)))
+      (define-key map (kbd "b") #'(lambda () (interactive) (org-bib-entry-show 'bibtex)))
+      (define-key map (kbd "=") #'(lambda () (interactive) (org-bib-entry-show 'preview)))
+      (define-key map (kbd "a") #'(lambda () (interactive) (org-bib-entry-show 'abstract)))
 
-      (define-key map (kbd "v p")   #'org-bib-view-mode-pdf)
-      (define-key map (kbd "v RET") #'org-bib-view-mode-none)
-      (define-key map (kbd "v i")   #'org-bib-view-mode-info)
-      (define-key map (kbd "v n")   #'org-bib-view-mode-notes)
-      (define-key map (kbd "v b")   #'org-bib-view-mode-bibtex)
-      (define-key map (kbd "v a")   #'org-bib-view-mode-abstract))))
+      (define-key map (kbd "v p")   #'(lambda () (interactive) (org-bib-view-mode 'pdf)))
+      (define-key map (kbd "v RET") #'(lambda () (interactive) (org-bib-view-mode 'none)))
+      (define-key map (kbd "v i")   #'(lambda () (interactive) (org-bib-view-mode 'info)))
+      (define-key map (kbd "v n")   #'(lambda () (interactive) (org-bib-view-mode 'notes)))
+      (define-key map (kbd "v b")   #'(lambda () (interactive) (org-bib-view-mode 'bibtex)))
+      (define-key map (kbd "v =")   #'(lambda () (interactive) (org-bib-view-mode 'preview)))
+      (define-key map (kbd "v a")   #'(lambda () (interactive) (org-bib-view-mode 'abstract))))))
 
 (defun org-bib-inactivate ()
   "Inactivates org-bib mode."
