@@ -57,20 +57,23 @@
 (require 'org-imenu)
 (require 'pdf-drop-mode)
 
-;; ----------------------------------------------------------------------------
+
 (defgroup org-bib nil
   "Literate bibliography"
   :group 'applications)
+
 
 (defcustom org-bib-library-copy-file t
   "Whether to copy new entry files to the library"
   :type 'boolean
   :group 'org-bib)
 
+
 (defcustom org-bib-library-rename-file t
   "Whether to rename files before copying them to the library"
   :type 'boolean
   :group 'org-bib)
+
 
 (defcustom org-bib-view-mode-default 'preview
   "Initial view mode."
@@ -83,26 +86,32 @@
                 (const :tag "Information" info))
   :group 'org-bib)
 
+
 (defcustom org-bib-abstract-section-name "Abstract"
   "Name for the abstract subsection"
   :type 'string
   :group 'org-bib)
+
 
 (defcustom org-bib-notes-section-name "Notes"
   "Name for the notes subsection"
   :type 'string
   :group 'org-bib)
 
+
 (defcustom org-bib-unsorted-section-name "Unsorted"
   "Name for the unsorted section where new entries will be filed."
   :type 'string
   :group 'org-bib)
 
+
 (defvar org-bib--refile-history '()
   "Dedicated refile history")
 
+
 (defvar org-bib--view-mode-current org-bib-view-mode-default
   "Current view mode")
+
 
 ;; This could be user configurable
 (defun org-bib-headline-format (entry)
@@ -110,6 +119,7 @@
   
   (format "%s (%s)" (cdr (assq :title entry))
                     (cdr (assq :year entry))))
+
 
 ;; This could be user configurable
 (defun org-bib-filename-format (entry)
@@ -133,6 +143,7 @@
       (bibtex-clean-entry t))
     (org-bibtex-read)))
 
+
 (defun org-bib-bibtex-from-arxiv (arxiv-id)
   "Retrieve bibtex item using arxiv API."
   
@@ -144,6 +155,7 @@
           (bibtex-entry-format nil))
       (bibtex-clean-entry t))
     (org-bibtex-read)))
+
 
 (defun org-bib-pdf-process (source-file file-id)
   "Add an entry (file & doi) under the unsorted heading."
@@ -206,6 +218,7 @@
   (with-current-buffer "*Ilist*"
     (org-imenu-update)))
 
+
 (defun org-bib-view-mode (mode)
   "Set view mode, one of 'info, 'abstract, 'notes, 'pdf, 'bibtex,
 'url, 'preview or 'none."
@@ -215,6 +228,7 @@
     (org-bib-view mode)
     (setq org-bib--view-mode-current mode)
     (force-mode-line-update)))
+
 
 (defun org-bib-view (&optional mode)
   "View selected entry according to mode, one of 'info, 'abstract,
@@ -256,7 +270,6 @@
 (defun org-bib-view-notes ()
   "Narrow to notes heading for the current item."
   
-  (org-bib-goto)
   (org-goto-first-child)
   (org-goto-sibling)
   (org-narrow-to-subtree))
@@ -369,11 +382,13 @@
       (bibtex-reformat))
     (switch-to-buffer bibtex-buffer)))
 
+
 (defun org-bib-view-pdf ()
   "View PDF of current item in a dedicated buffer."
   
   (when (org-entry-get (point) "FILENAME")
     (find-file (org-entry-get (point) "FILENAME"))))
+
 
 (defun org-bib-view-url ()
   "View URL of current item (using xwidgets) in a dedicated buffer."
@@ -393,12 +408,14 @@
       (org-entry-put (point) "STATUS" "READ")))
   (org-imenu-update))
 
+
 (defun org-bib-mark-read-and-goto-next ()
   "Mark selected entry as read."
   
   (interactive)
   (org-bib-entry-mark-read)
   (org-bib-next))
+
 
 (defun org-bib-mark-unread ()
   "Mark selected imenu-entry as read."
@@ -410,12 +427,14 @@
       (org-entry-put (point) "STATUS" "UNREAD")))
   (org-imenu-update))
 
+
 (defun org-bib-mark-unread-and-goto-next ()
   "Mark selected imenu-entry as read."
   
   (interactive)
   (org-bib-mark-unread)
   (org-bib-next))
+
 
 (defun org-bib-prev ()
   "Move to previous entry."
@@ -425,6 +444,7 @@
     (previous-line))
   (org-bib-view))
 
+
 (defun org-bib-next ()
   "Move to next entry."
     
@@ -432,6 +452,7 @@
   (with-current-buffer "*Ilist*"
     (next-line))
   (org-bib-view))
+
 
 (defun org-bib-pdf-next-page ()
   "Go to next page if a PDF is displayed"
@@ -443,6 +464,7 @@
     (when (derived-mode-p 'pdf-view-mode)
       (pdf-view-next-page-command))))
 
+
 (defun org-bib-pdf-prev-page ()
   "Go to previous page if a PDF is displayed"
   
@@ -452,6 +474,7 @@
     (other-window 1 nil nil)
     (when (derived-mode-p 'pdf-view-mode)
       (pdf-view-previous-page-command))))
+
 
 (defun org-bib-from-doi (&optional doi filename)
   "Add a new entry to the library using DOI and FILE (optional)"
@@ -466,6 +489,7 @@
   "Add a new entry to the library using BIBITEM and FILE (optional)"
   
   (error "Not yet implemented"))
+
 
 (defun org-bib-move ()
   "Move entry to another section"
@@ -483,6 +507,32 @@
       (org-bib-goto)
       (org-bib-view))))
 
+
+(defun org-bib-move-down ()
+  "Move item down"
+
+  (interactive)
+  (save-selected-window
+    (org-bib-goto)
+    (org-with-wide-buffer
+     (org-move-subtree-down)))
+  (org-imenu-update)
+  (org-bib-next))
+
+
+(defun org-bib-move-up ()
+  "Move item up"
+
+  (interactive)
+  (save-selected-window
+    (org-bib-goto)
+    (org-with-wide-buffer
+     (org-move-subtree-up)))
+  (org-imenu-update)
+  (org-bib-prev)
+  (org-bib-prev))
+  
+
 (defun org-bib-tag ()
   "Tag current entry "
 
@@ -491,6 +541,7 @@
     (org-bib-goto)
     (org-set-tags-command)
     (org-imenu-update)))
+
 
 (defun org-bib-export ()
   "Export library to a bibtex file"
@@ -505,6 +556,7 @@
               (library-file (or (cadar (org-collect-keywords '("LIBRARY-FILE")))
                                 (file-name-with-extension filename "bib"))))
           (org-bibtex library-file))))))
+
 
 (defun org-bib--imenu-filter-format (oldfun element todo tags marker level)
   "Advice function that is used to modify face for unread entries."
@@ -526,8 +578,6 @@
   (advice-add 'org-imenu-filter-format :around #'org-bib--imenu-filter-format)
 
   (with-current-buffer (current-buffer)
-    (setq-local org-refile-targets `( (,(buffer-name) :maxlevel . 1)))
-    (setq-local org-agenda-files (list (buffer-name)))
     (pdf-drop-mode)
     (org-imenu))
 
@@ -546,6 +596,9 @@
       
       (define-key map (kbd "<down>") #'org-bib-next)
       (define-key map (kbd "<up>")   #'org-bib-prev)
+
+      (define-key map (kbd "M-<down>") #'org-bib-move-down)
+      (define-key map (kbd "M-<up>")   #'org-bib-move-up)
 
       (define-key map (kbd "<left>")   #'org-bib-pdf-prev-page)
       (define-key map (kbd "<right>")  #'org-bib-pdf-next-page)
