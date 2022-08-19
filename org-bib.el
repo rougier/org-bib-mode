@@ -224,10 +224,10 @@
 'url, 'preview or 'none."
 
   (interactive)
-  (when (member mode '(pdf url info abstract notes preview bibtex none))
-    (org-bib-view mode)
-    (setq org-bib--view-mode-current mode)
-    (force-mode-line-update)))
+  ;; (when (member mode '(pdf url info abstract notes preview bibtex none))
+  (org-bib-view mode)
+  (setq org-bib--view-mode-current mode)
+  (force-mode-line-update))
 
 
 (defun org-bib-view (&optional mode)
@@ -235,17 +235,18 @@
 'notes, 'pdf, 'bibtex or 'none"
   
   (interactive)
-  (save-selected-window
-    (save-excursion
-      (let ((mode (or mode org-bib--view-mode-current)))
-        (org-bib-goto)
-        (cond ((eq mode 'abstract) (org-bib-view-abstract))
-              ((eq mode 'notes)    (org-bib-view-notes))
-              ((eq mode 'pdf)      (org-bib-view-pdf))
-              ((eq mode 'url)      (org-bib-view-url))
-              ((eq mode 'preview)  (org-bib-view-preview))
-              ((eq mode 'bibtex)   (org-bib-view-bibtex))
-              (t                   nil))))))
+  (let ((mode (or mode org-bib--view-mode-current)))
+    (unless (eq mode 'none)
+      (save-selected-window
+        (save-excursion
+          (org-bib-goto)
+          (cond ((eq mode 'abstract) (org-bib-view-abstract))
+                ((eq mode 'notes)    (org-bib-view-notes))
+                ((eq mode 'pdf)      (org-bib-view-pdf))
+                ((eq mode 'url)      (org-bib-view-url))
+                ((eq mode 'preview)  (org-bib-view-preview))
+                ((eq mode 'bibtex)   (org-bib-view-bibtex))
+                (t                   nil)))))))
 
 
 (defun org-bib-goto ()
