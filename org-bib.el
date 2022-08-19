@@ -372,7 +372,7 @@
     (with-temp-buffer
       (yank)
       (bibtex-mode)
-      (buffer-substring-no-properties (point-min) (point-max))))))
+      (buffer-substring-no-properties (point-min) (point-max)))))
 
   
 (defun org-bib-view-bibtex ()
