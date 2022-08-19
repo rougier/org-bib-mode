@@ -350,8 +350,7 @@
               (setq sibling (org-goto-sibling))))
         (setq preview (org-bib--preview t t))))
   
-;;    (other-window 1)
-    (switch-to-buffer (get-buffer-create "*org-bib-preview*"))
+    (switch-to-buffer (get-buffer-create "*org-bib: preview*"))
     (let ((inhibit-read-only t))
       (delete-region (point-min) (point-max))
       (insert preview)
@@ -363,31 +362,45 @@
       (setq-local org-return-follows-link t)
       (setq buffer-read-only t)
       (setq header-line-format nil)
-      (goto-char (point-min))
-;;      (other-window 1)
-      )))
+      (goto-char (point-min)))))
   
+
+(defun org-bib--bibtex ()
+
+  (let ((inhibit-message t))
+    (org-bibtex-export-to-kill-ring)
+    (with-temp-buffer
+      (yank)
+      (bibtex-mode)
+      (buffer-substring-no-properties (point-min) (point-max))))))
+
   
 (defun org-bib-view-bibtex ()
   "View bibtex of current item in a dedicated buffer."
-  
-  (let* ((custom-id (org-entry-get (point) "CUSTOM_ID"))
-         (bibtex-buffer (format "*%s:bibtex*" custom-id)))
-    (org-narrow-to-subtree)
-    (org-bibtex-export-to-kill-ring)
-    (with-current-buffer (get-buffer-create bibtex-buffer)
-      (erase-buffer)
-      (yank)
-      (bibtex-mode)
-      (bibtex-reformat))
-    (switch-to-buffer bibtex-buffer)))
+
+  (let ((content ""))
+    (save-excursion
+      (if (and (eq 1 (org-element-property :level (org-element-at-point)))
+               (org-goto-first-child))
+          (let ((sibling t))
+            (while sibling
+              (setq content (concat content (org-bib--bibtex) "\n"))
+              (setq sibling (org-goto-sibling))))
+        (setq content (org-bib--bibtex))))
+    (switch-to-buffer (get-buffer-create "*org-bib: bibtex*"))
+    (erase-buffer)
+    (insert content)
+    (goto-char (point-min))
+    (bibtex-mode)
+    (bibtex-reformat)))
 
 
 (defun org-bib-view-pdf ()
   "View PDF of current item in a dedicated buffer."
   
   (when (org-entry-get (point) "FILENAME")
-    (find-file (org-entry-get (point) "FILENAME"))))
+    (find-file (org-entry-get (point) "FILENAME"))
+    (setq-local header-line-format nil)))
 
 
 (defun org-bib-view-url ()
@@ -395,7 +408,8 @@
   
   (when (org-entry-get (point) "URL")
     (xwidget-webkit-goto-url (org-entry-get (point) "URL"))
-    (switch-to-buffer (xwidget-buffer (xwidget-webkit-current-session)))))
+    (switch-to-buffer (xwidget-buffer (xwidget-webkit-current-session)))
+    (setq-local header-line-format nil)))
 
 
 (defun org-bib-mark-read ()
@@ -413,7 +427,7 @@
   "Mark selected entry as read."
   
   (interactive)
-  (org-bib-entry-mark-read)
+  (org-bib-mark-read)
   (org-bib-next))
 
 
@@ -436,21 +450,21 @@
   (org-bib-next))
 
 
-(defun org-bib-prev ()
+(defun org-bib-prev (&optional count)
   "Move to previous entry."
   
   (interactive)
   (with-current-buffer "*Ilist*"
-    (previous-line))
+    (previous-line count))
   (org-bib-view))
 
 
-(defun org-bib-next ()
+(defun org-bib-next (&optional count)
   "Move to next entry."
     
   (interactive)
   (with-current-buffer "*Ilist*"
-    (next-line))
+    (next-line count))
   (org-bib-view))
 
 
@@ -509,28 +523,31 @@
 
 
 (defun org-bib-move-down ()
-  "Move item down"
+  "Move current item down"
 
   (interactive)
-  (save-selected-window
-    (org-bib-goto)
-    (org-with-wide-buffer
-     (org-move-subtree-down)))
-  (org-imenu-update)
-  (org-bib-next))
+  (let ((start (window-start)))
+    (save-selected-window
+      (org-bib-goto)
+      (org-with-wide-buffer
+       (org-move-subtree-down)))
+    (org-imenu-update)
+    (org-bib-next 1)
+    (set-window-start (selected-window) start)))
 
 
 (defun org-bib-move-up ()
-  "Move item up"
+  "Move current item up"
 
   (interactive)
+  (let ((start (window-start)))
   (save-selected-window
     (org-bib-goto)
     (org-with-wide-buffer
      (org-move-subtree-up)))
   (org-imenu-update)
-  (org-bib-prev)
-  (org-bib-prev))
+  (org-bib-prev 2)
+  (set-window-start (selected-window) start)))
   
 
 (defun org-bib-tag ()
@@ -550,9 +567,9 @@
   (save-selected-window
     (save-excursion
       (with-current-buffer imenu-list--displayed-buffer
-        (let ((filename (buffer-file-name))
-              (library-path (or (cadar (org-collect-keywords '("LIBRARY-PATH")))
-                                (file-name-directory filename)))
+        (let* ((filename (buffer-file-name))
+               (library-path (or (cadar (org-collect-keywords '("LIBRARY-PATH")))
+                                 (file-name-directory filename)))
               (library-file (or (cadar (org-collect-keywords '("LIBRARY-FILE")))
                                 (file-name-with-extension filename "bib"))))
           (org-bibtex library-file))))))
