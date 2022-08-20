@@ -347,7 +347,8 @@
                (org-goto-first-child))
           (let ((sibling t))
             (while sibling
-              (setq preview (concat preview (org-bib--preview)))
+              (when (org-bib--item-visible)
+                (setq preview (concat preview (org-bib--preview))))
               (setq sibling (org-goto-sibling))))
         (setq preview (org-bib--preview t t))))
   
@@ -375,7 +376,22 @@
       (bibtex-mode)
       (buffer-substring-no-properties (point-min) (point-max)))))
 
+
+(defun org-bib--item-visible ()
+  "Test if heading at point is visible in imenu"
   
+  (let* ((element (org-element-at-point))
+         (begin (org-element-property :begin element))
+         (end (org-element-property :end element))
+         (marker (copy-marker begin))
+         (level (org-element-property :level element))
+         (todo (org-element-property :todo-keyword element))
+         (tags (save-excursion
+                 (goto-char begin)
+                 (org-get-tags)))
+         (node (org-imenu-filter-format element todo tags marker level)))
+    (imenu--in-alist node imenu-list--imenu-entries)))
+    
 (defun org-bib-view-bibtex ()
   "View bibtex of current item in a dedicated buffer."
 
@@ -385,7 +401,8 @@
                (org-goto-first-child))
           (let ((sibling t))
             (while sibling
-              (setq content (concat content (org-bib--bibtex) "\n"))
+              (when (org-bib--item-visible)
+                (setq content (concat content (org-bib--bibtex) "\n")))
               (setq sibling (org-goto-sibling))))
         (setq content (org-bib--bibtex))))
     (switch-to-buffer (get-buffer-create "*org-bib: bibtex*"))
