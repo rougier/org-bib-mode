@@ -29,27 +29,39 @@ org-bib mode depends on [[https://github.com/rougier/pdf-drop-mode][pdf-drop-mod
 
 * Configuration
 
-The minimal document structure is a document with a single level headline that is used to store new entries. It is configurable via the [[help:org-bib-unsorted-header][org-bib-unsorted-header]] variable (default is "Unsorted"). While not strictly necessary but highly recommended, you can also add a local mode line variable telling emacs to use org-bib mode when opening the file:
+The minimal document structure is a document with a single level headline that is used to store new entries. It is configurable via the [[help:org-bib-unsorted-header][org-bib-unsorted-header]] variable (default is "Unsorted").
 
 #+begin_example
-  ;; -*- mode: org-bib-mode -*-
+  #+LIBRARY-PATH: ~/Documents
+  #+LIBRARY-FILE: ~/Documents/my-bibliography.bib
+  
   * Unsorted
 #+end_example
 
-You need to ensure [[help:pdf-drop-exitftool-path][pdf-drop-exiftool-path]] and [[help:org-drop-pdttotext-path][pdf-drop-pdftotext-path]] points to relevant binaries (these are needed to extract information from
-PDF metadata (exiftool) or PDF content (pdftotext)). Last step is to tell org-bib where to store PDFs. This is done via the [[help:org-bib-library-path][org-bib-library-path]].
+You need to ensure [[help:pdf-drop-exitftool-path][pdf-drop-exiftool-path]] and [[help:org-drop-pdttotext-path][pdf-drop-pdftotext-path]] points
+to relevant binaries (these are needed to extract information from PDF
+metadata (exiftool) or PDF content (pdftotext)). Last step is to tell org-bib
+where to store PDFs. This is done via the "#+LIBRARY-PATH" keyword that you
+can set at the top of your org-file.
 
 * Key bindings
 
 - "i" : show information
 - "a" : show abstract
 - "n" : show notes
+- "u" : show URL (using xwidgets)
 - "p" : show PDF (if available)
+- "=" : show preview
 - "b" : show bibtex
 
 - "f" : filter visible entries
 - "e" : export bibliography
 - "m" : Move entry (refile)
+- "M-<down>" : Move entry down
+- "M-<up>" : Move entry up
+- "S-<left>" : Next pdf page (when view is PDF)
+- "S-<right>" : Previous pdf page  (when view is PDF)
+  
 - "<return>" : go to entry
 
 - "<tab>" : toggle current section folding status
@@ -59,13 +71,13 @@ PDF metadata (exiftool) or PDF content (pdftotext)). Last step is to tell org-bi
 - "v a" : set view mode to abstract
 - "v n" : set view mode to notes
 - "v p" : set view mode to PDF
+- "v u" : set view mode to URL
+- "v =" : set view mode to previex
 - "v b" : set view mode to bibtex
 - "v <return>" : exit view mode
   
-- "?" : Mark entry as unread
-- "!" : Mark entry as read
-- "+" : Increase menu depth
-- "-" : Decreaase menu depth
+- "?" : Mark entry as unread and move to next
+- "!" : Mark entry as read  and move to next
 
 * *Adding an entry*
 
