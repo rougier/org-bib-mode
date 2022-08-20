@@ -48,13 +48,14 @@
 
 ;; Emacs core
 (require 'org)
-(require 'bibtex)
 (require 'org-indent)
 (require 'org-element)
 (require 'citeproc)
 (require 'oc-csl)
 (require 'ol-bibtex)
 (require 'xwidget)
+(require 'bibtex)
+
 
 ;; Needs installation
 (require 'org-imenu)
@@ -341,6 +342,7 @@ only render author names."
                      (with-temp-buffer
                        (yank)
                        (goto-char (point-min))
+                       (bibtex-mode)
                        (org-bib--author-names))))
          (title     (org-entry-get (point) "TITLE"))
          (doi       (org-entry-get (point) "DOI"))
