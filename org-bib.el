@@ -257,7 +257,8 @@
     (when (imenu--subalist-p entry)
       (setq entry (cons (car entry)
                         (get-text-property 0 'marker (car entry)))))
-    (imenu-list--goto-entry entry)))
+    (imenu-list--goto-entry entry)
+    (org-hide-drawer-all)))
 
 
 (defun org-bib-view-abstract ()
