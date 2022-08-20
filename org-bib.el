@@ -48,9 +48,12 @@
 
 ;; Emacs core
 (require 'org)
-(require 'ol-bibtex)
+(require 'bibtex)
 (require 'org-indent)
 (require 'org-element)
+(require 'citeproc)
+(require 'oc-csl)
+(require 'ol-bibtex)
 (require 'xwidget)
 
 ;; Needs installation
@@ -112,6 +115,45 @@
 (defvar org-bib--view-mode-current org-bib-view-mode-default
   "Current view mode")
 
+
+(defvar org-bib--author-name-csl
+  "<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<style xmlns=\"http://purl.org/net/xbiblio/csl\" class=\"in-text\" version=\"1.0\" demote-non-dropping-particle=\"never\">
+  <macro name=\"author-bib\">
+    <names variable=\"composer\" delimiter=\", \">
+      <name name-as-sort-order=\"all\" and=\"symbol\" sort-separator=\", \" initialize-with=\". \" delimiter=\", \" delimiter-precedes-last=\"always\"/>
+      <substitute>
+        <names variable=\"author\"/>
+        <names variable=\"illustrator\"/>
+        <names variable=\"director\">
+          <name name-as-sort-order=\"all\" and=\"symbol\" sort-separator=\", \" initialize-with=\". \" delimiter=\", \" delimiter-precedes-last=\"always\"/>
+          <label form=\"long\" prefix=\" (\" suffix=\")\" text-case=\"title\"/>
+        </names>
+        <names variable=\"editor\" delimiter=\", \">
+          <name name-as-sort-order=\"all\" and=\"symbol\" sort-separator=\", \" initialize-with=\". \" delimiter=\", \" delimiter-precedes-last=\"always\"/>
+          <label form=\"short\" prefix=\" (\" suffix=\")\" text-case=\"title\"/>
+        </names>
+        <names variable=\"editorial-director\">
+          <name name-as-sort-order=\"all\" and=\"symbol\" sort-separator=\", \" initialize-with=\". \" delimiter=\", \" delimiter-precedes-last=\"always\"/>
+          <label form=\"short\" prefix=\" (\" suffix=\")\" text-case=\"title\"/>
+        </names>
+        <names variable=\"collection-editor\">
+          <name name-as-sort-order=\"all\" and=\"symbol\" sort-separator=\", \" initialize-with=\". \" delimiter=\", \" delimiter-precedes-last=\"always\"/>
+          <label form=\"short\" prefix=\" (\" suffix=\")\" text-case=\"title\"/>
+        </names>
+      </substitute>
+    </names>
+  </macro>
+  <bibliography >
+     <sort>
+       <key macro=\"author-bib\"/>
+     </sort>
+     <layout>
+       <text macro=\"author-bib\" />
+     </layout>
+   </bibliography>
+</style>"
+  "CSL style to get only author names (as used in preview mode).")
 
 ;; This could be user configurable
 (defun org-bib-headline-format (entry)
@@ -277,11 +319,29 @@
   (org-narrow-to-subtree))
   
 
+(defun org-bib--author-names ()
+  "Return author names from the bibtex entry at point. Author names
+are rendered through citeproc, using a dedicated csl style that
+only render author names."
+ 
+  (save-excursion
+    (bibtex-beginning-of-entry)
+    (let* ((data (citeproc-bt-entry-to-csl (bibtex-parse-entry)))
+           (proc (citeproc-create-style
+                  org-bib--author-name-csl (org-cite-csl--locale-getter) "en-US" "en-US")))
+      (citeproc-render-item data proc 'bib 'plain))))
+
 (defun org-bib--preview (&optional with-abstract with-note)
   "Build a preview of the entry at point."
   
-  (let* ((author    (or (org-entry-get (point) "AUTHOR")
-                        (org-entry-get (point) "EDITOR")))
+  (let* (;;(author    (or (org-entry-get (point) "AUTHOR")
+         ;;               (org-entry-get (point) "EDITOR")))
+         (author   (progn
+                     (org-bibtex-export-to-kill-ring)
+                     (with-temp-buffer
+                       (yank)
+                       (goto-char (point-min))
+                       (org-bib--author-names))))
          (title     (org-entry-get (point) "TITLE"))
          (doi       (org-entry-get (point) "DOI"))
          (custom-id (org-entry-get (point) "CUSTOM_ID"))
@@ -369,7 +429,8 @@
   
 
 (defun org-bib--bibtex ()
-
+  "Return the bibtex item corresponding to (org) heading at point."
+  
   (let ((inhibit-message t))
     (org-bibtex-export-to-kill-ring)
     (with-temp-buffer
