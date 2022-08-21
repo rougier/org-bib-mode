@@ -291,6 +291,13 @@
                 ((eq mode 'bibtex)   (org-bib-view-bibtex))
                 (t                   nil)))))))
 
+(defun org-bib-view-goto (&optional mode)
+  "View and go to selected entry according to mode, one of 'info, 'abstract,
+'notes, 'pdf, 'bibtex or 'none"
+
+  (org-bib-view mode)
+  (other-window 1))
+  
 
 (defun org-bib-goto ()
   "Move point to the corresponding current item in the org buffer."
@@ -335,15 +342,12 @@ only render author names."
 (defun org-bib--preview (&optional with-abstract with-note)
   "Build a preview of the entry at point."
   
-  (let* (;;(author    (or (org-entry-get (point) "AUTHOR")
-         ;;               (org-entry-get (point) "EDITOR")))
-         (author   (progn
-                     (org-bibtex-export-to-kill-ring)
-                     (with-temp-buffer
-                       (yank)
-                       (goto-char (point-min))
-                       (bibtex-mode)
-                       (org-bib--author-names))))
+  (let* ((author (progn
+                   (org-bibtex-export-to-kill-ring)
+                   (with-temp-buffer
+                     (yank)
+                     (goto-char (point-min))
+                     (org-bib--author-names))))
          (title     (org-entry-get (point) "TITLE"))
          (doi       (org-entry-get (point) "DOI"))
          (custom-id (org-entry-get (point) "CUSTOM_ID"))
@@ -676,6 +680,12 @@ only render author names."
   (setq imenu-list-after-jump-hook #'org-tree-to-indirect-buffer)
   (advice-add 'org-imenu-filter-format :around #'org-bib--imenu-filter-format)
 
+  ;; BUG: if bibtex-mode is initialized, bibtex-parse-entry does not work
+  ;; properly
+  (with-current-buffer (get-buffer-create "__dummy__.bib")
+    (bibtex-mode)
+    (kill-buffer))
+  
   (with-current-buffer (current-buffer)
     (pdf-drop-mode)
     (org-imenu))
@@ -716,6 +726,12 @@ only render author names."
       (define-key map (kbd "b") #'(lambda () (interactive) (org-bib-view 'bibtex)))
       (define-key map (kbd "=") #'(lambda () (interactive) (org-bib-view 'preview)))
       (define-key map (kbd "a") #'(lambda () (interactive) (org-bib-view 'abstract)))
+
+      (define-key map (kbd "P") #'(lambda () (interactive) (org-bib-view-goto 'pdf)))
+      (define-key map (kbd "U") #'(lambda () (interactive) (org-bib-view-goto 'url)))
+      (define-key map (kbd "I") #'(lambda () (interactive) (org-bib-view-goto 'info)))
+      (define-key map (kbd "N") #'(lambda () (interactive) (org-bib-view-goto 'notes)))
+      (define-key map (kbd "A") #'(lambda () (interactive) (org-bib-view-goto 'abstract)))
 
       (define-key map (kbd "v p")   #'(lambda () (interactive) (org-bib-view-mode 'pdf)))
       (define-key map (kbd "v RET") #'(lambda () (interactive) (org-bib-view-mode 'none)))
