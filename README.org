@@ -49,12 +49,18 @@ can set at the top of your org-file.
 
 * Key bindings
 
+| Key | Description    |   | Key | Description               |
+|-----+----------------+---+-----+---------------------------|
+| =i=   | Show org entry |   | =v i= | Set view mode to org      |
+| =a=   | Show abstract  |   | =v a= | Set ivew mode to abstract |
+
+  
 - =i= : show information
 - =a= : show abstract
 - =n= : show notes
 - =u= : show URL (using xwidgets)
 - =p= : show PDF (if available)
-- === : show preview
+- ~=~ : show preview
 - =b= : show bibtex
 
 - =f= : filter visible entries
