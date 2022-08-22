@@ -81,17 +81,18 @@ An entry is made of a properties block with two sub headlines (Abstract and Note
 
 * *Export the bibliography*
 
-To export the library to a bib file, you can use the [[help:org-bib-export][org-bib-export]] command (that is bound to the "e" key on the sidebar).
+To export the library to a bib file, you can use the [[help:org-bib-export][org-bib-export]] command
+(that is bound to the =e= key on the sidebar). The export filename will be deduced from the org filename unless a =#+LIBRARY-FILE:= is defined at the top of the org file.
 
 * Filter view
 
-You can filter the sidebar view ("f" key). Here are some example searches.
-Note the absence of spaces.
+You can filter the sidebar view (=f=) usin any kind of filtes. Here are some
+example searches (note the absence of spaces):
 
-Articles published in 1984:             YEAR=1984
-Articles published between 2000 & 2010: YEAR>1999+YEAR<2011
-Journal articles:                       TYPE={article}
-Papers by Knuth:                        AUTHOR={Knuth}
-Article published in a journal:         JOURNAL={The Computer Journal}
+- Articles published in 1984:             YEAR=1984
+- Articles published between 2000 & 2010: YEAR>1999+YEAR<2011
+- Journal articles:                       TYPE={article}
+- Papers by Knuth:                        AUTHOR={Knuth}
+- Article published in a journal:         JOURNAL={The Computer Journal}
 
 See also [[https://orgmode.org/worg/org-tutorials/advanced-searching.html][Advanced searching]] from the org [[https://orgmode.org/][website]].
