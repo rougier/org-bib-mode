@@ -44,8 +44,10 @@ The minimal document structure is a document with a single level headline that i
 You need to ensure [[help:pdf-drop-exitftool-path][pdf-drop-exiftool-path]] and [[help:org-drop-pdttotext-path][pdf-drop-pdftotext-path]] points
 to relevant binaries (these are needed to extract information from PDF
 metadata (exiftool) or PDF content (pdftotext)). Last step is to tell org-bib
-where to store PDFs. This is done via the "#+LIBRARY-PATH" keyword that you
-can set at the top of your org-file.
+where to store PDFs. This is done via the =#+LIBRARY-PATH= keyword that you can
+set at the top of your org-file. If you don't, the current directory will be
+used. PDF will be copied and renamed automatically if you set the
+corresponding options.
 
 * Key bindings
 
