@@ -5,7 +5,7 @@
 ;; Author: Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
 ;; Homepage: https://github.com/rougier/org-bib-mode
 ;; Keywords: convenience
-;; Version: 0.3.0
+;; Version: 0.4.0
 
 ;; Package-Requires: ((emacs "27.1") ("org-imenu") ("pdf-drop-mode"))
 
@@ -31,6 +31,7 @@
 ;; Version 0.4.0
 ;; - Use of citeproc to render author names in preview
 ;; - New key bindings to "view and go to"
+;; - Documentation updated
 ;;
 ;; Version 0.3.0
 ;; - Complete API change, taking advantage of ol-bibtex, org-imenu and pdf-drop-mode
