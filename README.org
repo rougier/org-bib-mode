@@ -49,44 +49,23 @@ can set at the top of your org-file.
 
 * Key bindings
 
-| Key | Description    |   | Key | Description               |
-|-----+----------------+---+-----+---------------------------|
-| =i=   | Show org entry |   | =v i= | Set view mode to org      |
-| =a=   | Show abstract  |   | =v a= | Set ivew mode to abstract |
-
+| Key      | Description            | Key        | Description                |
+|----------+------------------------+------------+----------------------------|
+| =i=        | Show org entry         | =v i=        | Set view mode to org entry |
+| =a=        | Show abstract          | =v a=        | Set view mode to abstract  |
+| =n=        | Show notes             | =v n=        | Set view mode to notes     |
+| ~=~        | Show preview           | =v p=        | Set view mode to preview   |
+| =b=        | Show bibtex            | =v b=        | Set view mode to bibtex    |
+| =u=        | Show URL               | =v u=        | Set view mode to URL       |
+| =p=        | Show PDF               | =v p=        | Set view mode to PDF       |
+|          |                        | =v <return>= | Exit view mode             |
+| =e=        | Export to bib file     | =f=          | Filter entries             |
+| =t=        | Tag entry              | =m=          | Move entry (refile)        |
+| =?=        | Mark entry unread      | =!=          | Mark entry read            |
+| =M-<down>= | Move entry down        | =M-<up>=     | Move entry up              |
+| =<tab>=    | Toggle current section | =S-<tab>=    | Toggle all sections        |
+| =S-<left>= | Next page (PDF view)   | =S-<right>=  | Prev page (PDF view)       |
   
-- =i= : show information
-- =a= : show abstract
-- =n= : show notes
-- =u= : show URL (using xwidgets)
-- =p= : show PDF (if available)
-- ~=~ : show preview
-- =b= : show bibtex
-
-- =f= : filter visible entries
-- =e= : export bibliography
-- =m= : Move entry (refile)
-- =M-<down>= : Move entry down
-- =M-<up>= : Move entry up
-- =S-<left>= : Next pdf page (when view is PDF)
-- =S-<right>= : Previous pdf page  (when view is PDF)
-  
-- =<return>= : go to entry
-
-- =<tab>= : toggle current section folding status
-- =<S-tab>= : toggle all sections folding status
-
-- =v i= : set view mode to info
-- =v a= : set view mode to abstract
-- =v n= : set view mode to notes
-- =v p= : set view mode to PDF
-- =v u= : set view mode to URL
-- =v == : set view mode to previex
-- =v b= : set view mode to bibtex
-- =v <return>= : exit view mode
-  
-- =?= : Mark entry as unread and move to next
-- =!= : Mark entry as read  and move to next
 
 * *Adding an entry*
 
