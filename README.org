@@ -1,7 +1,10 @@
 *Literate & annotated bibliography* — Nicolas P. Rougier
 
+[[./bibliography.png]]
+
 *NOTE* This literate and annotated bibliography is an adaptation of the idea 
 [[http://cachestocaches.com/2020/3/org-mode-annotated-bibliography/][Managing my Annotated Bibliography with Emacs' Org Mode]] by [[http://gjstein.com/][Gregory J Stein]].
+
 
 * Introduction
 
@@ -46,38 +49,38 @@ can set at the top of your org-file.
 
 * Key bindings
 
-- "i" : show information
-- "a" : show abstract
-- "n" : show notes
-- "u" : show URL (using xwidgets)
-- "p" : show PDF (if available)
-- "=" : show preview
-- "b" : show bibtex
+- =i= : show information
+- =a= : show abstract
+- =n= : show notes
+- =u= : show URL (using xwidgets)
+- =p= : show PDF (if available)
+- === : show preview
+- =b= : show bibtex
 
-- "f" : filter visible entries
-- "e" : export bibliography
-- "m" : Move entry (refile)
-- "M-<down>" : Move entry down
-- "M-<up>" : Move entry up
-- "S-<left>" : Next pdf page (when view is PDF)
-- "S-<right>" : Previous pdf page  (when view is PDF)
+- =f= : filter visible entries
+- =e= : export bibliography
+- =m= : Move entry (refile)
+- =M-<down>= : Move entry down
+- =M-<up>= : Move entry up
+- =S-<left>= : Next pdf page (when view is PDF)
+- =S-<right>= : Previous pdf page  (when view is PDF)
   
-- "<return>" : go to entry
+- =<return>= : go to entry
 
-- "<tab>" : toggle current section folding status
-- "<S-tab>" : toggle all sections folding status
+- =<tab>= : toggle current section folding status
+- =<S-tab>= : toggle all sections folding status
 
-- "v i" : set view mode to info
-- "v a" : set view mode to abstract
-- "v n" : set view mode to notes
-- "v p" : set view mode to PDF
-- "v u" : set view mode to URL
-- "v =" : set view mode to previex
-- "v b" : set view mode to bibtex
-- "v <return>" : exit view mode
+- =v i= : set view mode to info
+- =v a= : set view mode to abstract
+- =v n= : set view mode to notes
+- =v p= : set view mode to PDF
+- =v u= : set view mode to URL
+- =v == : set view mode to previex
+- =v b= : set view mode to bibtex
+- =v <return>= : exit view mode
   
-- "?" : Mark entry as unread and move to next
-- "!" : Mark entry as read  and move to next
+- =?= : Mark entry as unread and move to next
+- =!= : Mark entry as read  and move to next
 
 * *Adding an entry*
 

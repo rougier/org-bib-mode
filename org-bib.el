@@ -28,6 +28,10 @@
 
 ;;; News
 
+;; Version 0.4.0
+;; - Use of citeproc to render author names in preview
+;; - New key bindings to "view and go to"
+;;
 ;; Version 0.3.0
 ;; - Complete API change, taking advantage of ol-bibtex, org-imenu and pdf-drop-mode
 ;; - New features:
